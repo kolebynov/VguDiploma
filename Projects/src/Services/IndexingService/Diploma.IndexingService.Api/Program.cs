@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace Diploma.Api
+namespace Diploma.IndexingService.Api
 {
 	public class Program
 	{
