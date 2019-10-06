@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Diploma.IndexingService.Core.Objects
+namespace Diploma.IndexingService.Core.Commands
 {
-	public class Document
+	public class AddDocumentsResult
 	{
 	}
 }

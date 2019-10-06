@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Dto\Search\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Diploma.IndexingService.Core\Diploma.IndexingService.Core.csproj" />
   </ItemGroup>
 

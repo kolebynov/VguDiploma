@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Diploma.IndexingService.Api.Dto.DocIndex
+namespace Diploma.IndexingService.Api.Dto
 {
 	public class Document
 	{

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Diploma.IndexingService.Core;
+using Diploma.IndexingService.Api.Dto;
 using Diploma.IndexingService.Api.Extensions;
-using Diploma.IndexingService.Api.Dto.DocIndex;
+using Diploma.IndexingService.Core.Commands;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,23 +15,22 @@ namespace Diploma.IndexingService.Api.Controllers
 	[ApiController]
 	public class IndexController : ControllerBase
 	{
-		private readonly IDocumentIndexer documentIndexer;
+		private readonly IMediator mediator;
 
-		public IndexController(IDocumentIndexer documentIndexer)
+		public IndexController(IMediator mediator)
 		{
-			this.documentIndexer = documentIndexer ?? throw new ArgumentNullException(nameof(documentIndexer));
+			this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 		}
 
 		[HttpPost]
-		public async Task AddDocuments([FromBody] IReadOnlyCollection<Document> documents)
+		public Task AddDocuments([FromBody] IReadOnlyCollection<Document> documents)
 		{
-			await documentIndexer.AddDocuments(documents.Select(x => x.ToIndexDocument()).ToArray());
+			return mediator.Send(new AddDocumentsCommand(documents.Select(x => x.ToDocumentInfo()).ToArray()));
 		}
 
 		[HttpPost("{documentId}/content")]
 		public async Task AddDocumentContent(string documentId, IFormFile file)
 		{
-			await documentIndexer.AddDocumentContent(documentId, file.OpenReadStream());
 		}
 	}
 }
