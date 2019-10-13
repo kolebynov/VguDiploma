@@ -4,35 +4,22 @@ namespace Diploma.IndexingService.Core.Objects
 {
 	public class DocumentInfo
 	{
-		public string Id { get; }
+		public DocumentIdentity Id { get; }
 
 		public string FileName { get; }
 
 		public DateTimeOffset ModificationDate { get; }
 
-		public string UserIdentity { get; }
-
-		public DocumentInfo(string id, string fileName, DateTimeOffset modificationDate, string userIdentity)
+		public DocumentInfo(DocumentIdentity id, string fileName, DateTimeOffset modificationDate)
 		{
 			if (string.IsNullOrEmpty(fileName))
 			{
 				throw new ArgumentException("Value cannot be null or empty.", nameof(fileName));
 			}
 
-			if (string.IsNullOrEmpty(id))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(id));
-			}
-
-			if (string.IsNullOrEmpty(userIdentity))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(userIdentity));
-			}
-
-			Id = id;
+			Id = id ?? throw new ArgumentNullException(nameof(id));
 			FileName = fileName;
 			ModificationDate = modificationDate;
-			UserIdentity = userIdentity;
 		}
 	}
 }

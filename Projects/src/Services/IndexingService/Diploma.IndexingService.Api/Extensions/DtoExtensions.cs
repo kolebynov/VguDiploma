@@ -12,7 +12,7 @@ namespace Diploma.IndexingService.Api.Extensions
 				throw new ArgumentNullException(nameof(document));
 			}
 
-			return new DocumentInfo(document.Id, document.FileName, document.ModificationDate, null);
+			return new DocumentInfo(new DocumentIdentity(document.Id, null), document.FileName, document.ModificationDate);
 		}
 	}
 }
