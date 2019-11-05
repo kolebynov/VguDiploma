@@ -1,4 +1,5 @@
 ﻿using System;
+using Diploma.IndexingService.Core.Interfaces;
 
 namespace Diploma.IndexingService.Core.Objects
 {
@@ -10,7 +11,9 @@ namespace Diploma.IndexingService.Core.Objects
 
 		public DateTimeOffset ModificationDate { get; }
 
-		public DocumentInfo(DocumentIdentity id, string fileName, DateTimeOffset modificationDate)
+		public IContent Content { get; }
+
+		public DocumentInfo(DocumentIdentity id, string fileName, DateTimeOffset modificationDate, IContent content)
 		{
 			if (string.IsNullOrEmpty(fileName))
 			{
@@ -20,6 +23,7 @@ namespace Diploma.IndexingService.Core.Objects
 			Id = id ?? throw new ArgumentNullException(nameof(id));
 			FileName = fileName;
 			ModificationDate = modificationDate;
+			Content = content ?? throw new ArgumentNullException(nameof(content));
 		}
 	}
 }

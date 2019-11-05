@@ -1,4 +1,9 @@
 ﻿using System.Reflection;
+using Diploma.IndexingService.Api.Interfaces;
+using Diploma.IndexingService.Api.Internal;
+using Diploma.IndexingService.Core;
+using Diploma.IndexingService.Core.Interfaces;
+using Diploma.IndexingService.Core.Internal;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -20,8 +25,15 @@ namespace Diploma.IndexingService.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMediatR(Assembly.GetExecutingAssembly());
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IndexingQueue).Assembly);
+			services.AddMvc(opt => opt.EnableEndpointRouting = false)
+				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
+			services.AddSingleton<ITempContentStorage, TempContentStorage>();
+			services.AddSingleton<IIndexingQueue, IndexingQueue>();
+			services.AddSingleton<ITextExtractor, TextExtractor>();
+			services.AddSingleton<IDocumentStorage, DocumentStorage>();
+			services.AddHostedService<DocumentProcessorWorker>();
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

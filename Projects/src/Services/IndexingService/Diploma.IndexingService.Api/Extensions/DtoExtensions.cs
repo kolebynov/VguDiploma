@@ -1,18 +1,19 @@
 ﻿using System;
+using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 
 namespace Diploma.IndexingService.Api.Extensions
 {
 	public static class DtoExtensions
 	{
-		public static DocumentInfo ToDocumentInfo(this Dto.Document document)
+		public static DocumentInfo ToDocumentInfo(this Dto.Document document, IContent content)
 		{
 			if (document == null)
 			{
 				throw new ArgumentNullException(nameof(document));
 			}
 
-			return new DocumentInfo(new DocumentIdentity(document.Id, null), document.FileName, document.ModificationDate);
+			return new DocumentInfo(new DocumentIdentity(document.Id, "123"), document.FileName, document.ModificationDate, content);
 		}
 	}
 }

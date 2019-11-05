@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Diploma.IndexingService.Core.Configuration
+﻿namespace Diploma.IndexingService.Core.Configuration
 {
 	public class IndexingQueueOptions
 	{

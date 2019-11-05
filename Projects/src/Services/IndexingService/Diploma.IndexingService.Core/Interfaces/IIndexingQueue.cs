@@ -9,6 +9,6 @@ namespace Diploma.IndexingService.Core.Interfaces
 	{
 		Task Enqueue(IReadOnlyCollection<DocumentInfo> documents, CancellationToken cancellationToken);
 
-		Task<(DocumentInfo oldDocument, DocumentInfo newDocument)> Dequeue(CancellationToken cancellationToken);
+		Task<DocumentInfo> Dequeue(CancellationToken cancellationToken);
 	}
 }
