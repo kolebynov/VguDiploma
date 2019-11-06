@@ -24,7 +24,7 @@ namespace Diploma.IndexingService.Core
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				var document = await indexingQueue.Dequeue(stoppingToken);
-				var extractedText = await textExtractor.Extract(document.FileName, document.Content.OpenReadStream(), stoppingToken);
+				var extractedText = await textExtractor.Extract(document.FileName, document.Content, stoppingToken);
 				await documentStorage.SaveDocumentToDb(document, extractedText);
 			}
 		}
