@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  elasticsearch:
+    iamge: elasticsearch:7.4.2
+
+  diploma.indexingservice.api:
+    image: ${DOCKER_REGISTRY-}diplomaindexingserviceapi
+    build:
+      context: .
+      dockerfile: src/Services/IndexingService/Diploma.IndexingService.Api/Dockerfile
+    links:
+      elasticsearch: elasticsearch
