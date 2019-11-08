@@ -8,5 +8,5 @@ RUN dotnet publish "Diploma.IndexingService.Api.csproj" -c Release -o /app/publi
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS final
 WORKDIR /app
 EXPOSE 80
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "Diploma.IndexingService.Api.dll"]

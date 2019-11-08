@@ -2,12 +2,19 @@ version: '3.4'
 
 services:
   elasticsearch:
-    iamge: elasticsearch:7.4.2
+    image: elasticsearch:7.4.2
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-CU16-ubuntu
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=sa_STRONG_password
 
   diploma.indexingservice.api:
-    image: ${DOCKER_REGISTRY-}diplomaindexingserviceapi
+    image: diplomaindexingserviceapi
     build:
       context: .
       dockerfile: src/Services/IndexingService/Diploma.IndexingService.Api/Dockerfile
     links:
-      elasticsearch: elasticsearch
+      - elasticsearch:elasticsearch
+      - mssql:mssql

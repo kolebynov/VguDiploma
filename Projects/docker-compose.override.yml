@@ -1,8 +1,14 @@
 version: '3.4'
 
 services:
+  elasticsearch:
+    environment:
+      - discovery.type=single-node
+
   diploma.indexingservice.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - connectionStrings:msSqlServer=Server=mssql;Database=IndexingService
+      - connectionStrings:elasticsearch=http://elasticsearch:9200
     ports:
-      - "80"
+      - "90:80"
