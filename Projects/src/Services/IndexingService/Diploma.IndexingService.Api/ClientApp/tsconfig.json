@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "esnext",
+    "target": "es6",
+    "jsx": "react",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "incremental": true,
+    "paths": {
+      "@app/*": [
+        "src/scripts/*"
+      ]
+    }
+  },
+  "include": [
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ]
+}
