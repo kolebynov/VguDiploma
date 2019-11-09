@@ -24,7 +24,9 @@ namespace Diploma.IndexingService.Core.Extensions
 			services.AddDbContext<ContentStorageContext, ContentStorageContext>(
 				(sp, opt) => opt.UseSqlServer(
 					sp.GetRequiredService<IOptions<CoreOptions>>().Value.ContentStorage.MsSqlConnectionString,
-					sqlOpt => sqlOpt.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)));
+					sqlOpt => sqlOpt
+						.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)
+						.EnableRetryOnFailure(10)));
 
 			services.AddSingleton<IIndexingQueue, IndexingQueue>();
 			services.AddSingleton<ITextExtractor, TextExtractor>();

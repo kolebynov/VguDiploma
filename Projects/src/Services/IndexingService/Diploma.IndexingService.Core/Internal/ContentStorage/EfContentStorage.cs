@@ -46,7 +46,6 @@ namespace Diploma.IndexingService.Core.Internal.ContentStorage
 
 			dbItem.Timestamp = DateTimeOffset.UtcNow;
 			dbItem.Content = await content.ReadAsByteArray(cancellationToken);
-
 			await context.SaveChangesAsync(cancellationToken);
 
 			return new ContentStorageItem(id, category, content, dbItem.Timestamp);
@@ -81,20 +80,39 @@ namespace Diploma.IndexingService.Core.Internal.ContentStorage
 			}
 
 			var skip = 0;
-			ContentStorageDbItem[] page;
+			ContentStorageItem[] page;
 			do
 			{
 				cancellationToken.ThrowIfCancellationRequested();
 
-				page = await context.Items.Where(x => x.Category == category).Skip(skip).Take(options.PageSize).ToArrayAsync(cancellationToken);
-				yield return page.Select(x =>
-					new ContentStorageItem(x.Id, x.Category, new ByteArrayContent(x.Content), x.Timestamp)).ToArray();
+				page = (await context.Items.AsNoTracking()
+					.Where(x => x.Category == category)
+					.Select(x => new
+					{
+						x.Id, x.Category, x.Timestamp
+					})
+					.Skip(skip)
+					.Take(options.PageSize)
+					.ToArrayAsync(cancellationToken))
+					.Select(x => new ContentStorageItem(
+						x.Id, x.Category,
+						new ByteArrayContent(async () => (await Find(x.Id, x.Category, CancellationToken.None)).Content),
+						x.Timestamp))
+					.ToArray();
+
+				if (!page.Any())
+				{
+					yield break;
+				}
+
+				yield return page;
 				skip += options.PageSize;
 			}
 			while (page.Length == options.PageSize);
 		}
 
-		private ValueTask<ContentStorageDbItem> Find(string id, string category, CancellationToken cancellationToken)
+		private ValueTask<ContentStorageDbItem> Find(string id, string category,
+			CancellationToken cancellationToken)
 		{
 			if (string.IsNullOrEmpty(id))
 			{

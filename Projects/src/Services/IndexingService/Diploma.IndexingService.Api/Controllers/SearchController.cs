@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Diploma.Api.Shared.Dto;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public Task<IReadOnlyCollection<FoundDocument>> Search(string searchString)
-		{
-			return documentStorage.Search(new SearchQuery { SearchString = searchString }, CancellationToken.None);
-		}
+		public async Task<ApiResult<IReadOnlyCollection<FoundDocument>>> Search(string searchString) => 
+			ApiResult.SuccessResultWithData(await documentStorage.Search(new SearchQuery { SearchString = searchString }, CancellationToken.None));
 	}
 }

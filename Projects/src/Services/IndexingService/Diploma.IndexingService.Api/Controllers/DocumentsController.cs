@@ -29,7 +29,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task AddDocuments([FromBody] IReadOnlyCollection<Document> documents)
+		public async Task<ApiResult> AddDocuments([FromBody] IReadOnlyCollection<Document> documents)
 		{
 			var documentsToAdd = new List<DocumentInfo>();
 			foreach (var documentDto in documents)
@@ -39,6 +39,7 @@ namespace Diploma.IndexingService.Api.Controllers
 			}
 
 			await mediator.Send(new AddDocumentsCommand(documentsToAdd));
+			return ApiResult.SuccessResult;
 		}
 
 		[HttpPost("upload")]
