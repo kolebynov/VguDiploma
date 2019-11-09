@@ -24,7 +24,7 @@ namespace Diploma.IndexingService.Core.Objects
 			UserIdentity = userIdentity;
 		}
 
-		public DocumentIdentity FromString(string stringId)
+		public static DocumentIdentity FromString(string stringId)
 		{
 			var lastIndex = stringId.LastIndexOf('_');
 			if (lastIndex < 0)

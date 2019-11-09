@@ -17,12 +17,12 @@ namespace Diploma.IndexingService.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class IndexController : ControllerBase
+	public class DocumentsController : ControllerBase
 	{
 		private readonly IMediator mediator;
 		private readonly ITempContentStorage tempContentStorage;
 
-		public IndexController(IMediator mediator, ITempContentStorage tempContentStorage)
+		public DocumentsController(IMediator mediator, ITempContentStorage tempContentStorage)
 		{
 			this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 			this.tempContentStorage = tempContentStorage ?? throw new ArgumentNullException(nameof(tempContentStorage));

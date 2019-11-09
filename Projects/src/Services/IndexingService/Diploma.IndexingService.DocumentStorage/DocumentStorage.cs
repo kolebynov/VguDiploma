@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Interfaces;
@@ -44,6 +46,28 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			}
 
 			await contentStorage.Save(document.Id.ToString(), ContentCategory, document.Content, cancellationToken);
+		}
+
+		public async Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery,
+			CancellationToken cancellationToken)
+		{
+			var response = await elasticClient.SearchAsync<DocumentInfo>(
+				sd => sd
+					.Index(options.IndexName)
+					.Query(qd => qd
+						.MultiMatch(mmqd => mmqd
+							.Fields(new[] { "text", "fileName" })
+							.Query(searchQuery.SearchString)))
+					.Highlight(hs => hs
+						.Fields(hfd => hfd.Field("text"), hfd => hfd.Field("fileName")))
+					.Source(false),
+				cancellationToken);
+
+			return response.Hits.Select(hit => new FoundDocument
+			{
+				DocumentId = DocumentIdentity.FromString(hit.Id),
+				Matches = hit.Highlight
+			}).ToArray();
 		}
 	}
 }
