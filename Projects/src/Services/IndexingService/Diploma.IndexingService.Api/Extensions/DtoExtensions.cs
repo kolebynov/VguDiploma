@@ -1,6 +1,6 @@
 ﻿using System;
-using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
+using Diploma.Shared.Interfaces;
 
 namespace Diploma.IndexingService.Api.Extensions
 {

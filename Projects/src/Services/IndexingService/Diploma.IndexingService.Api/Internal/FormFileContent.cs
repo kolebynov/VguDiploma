@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
-using Diploma.IndexingService.Core.Interfaces;
+using System.Threading;
+using System.Threading.Tasks;
+using Diploma.Shared.Interfaces;
 using Microsoft.AspNetCore.Http;
 
 namespace Diploma.IndexingService.Api.Internal
@@ -16,6 +18,6 @@ namespace Diploma.IndexingService.Api.Internal
 			this.formFile = formFile ?? throw new ArgumentNullException(nameof(formFile));
 		}
 
-		public Stream OpenReadStream() => formFile.OpenReadStream();
+		public Task<Stream> OpenReadStream(CancellationToken cancellationToken) => Task.FromResult(formFile.OpenReadStream());
 	}
 }

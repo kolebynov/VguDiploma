@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.Shared", "src\Infra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.Api.Shared", "src\Infrastructure\Diploma.Api.Shared\Diploma.Api.Shared.csproj", "{31300044-5118-48F2-B969-3BDE8BDCEF61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.IndexingService.DocumentStorage", "src\Services\IndexingService\Diploma.IndexingService.DocumentStorage\Diploma.IndexingService.DocumentStorage.csproj", "{4DE52971-14D6-433F-BC19-D54572548BDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.IndexingService.EsDocumentStorage", "src\Services\IndexingService\Diploma.IndexingService.DocumentStorage\Diploma.IndexingService.EsDocumentStorage.csproj", "{4DE52971-14D6-433F-BC19-D54572548BDB}"
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{F25C0894-EBC5-47C5-ACC8-FF96265CE6F9}"
 EndProject

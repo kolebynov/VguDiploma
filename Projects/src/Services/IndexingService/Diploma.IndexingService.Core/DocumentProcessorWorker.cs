@@ -2,30 +2,48 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Interfaces;
-using Microsoft.Extensions.Hosting;
+using Diploma.IndexingService.Core.Objects;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Diploma.IndexingService.Core
 {
-	public class DocumentProcessorWorker : BackgroundService
+	internal class DocumentProcessorWorker : BackgroundServiceWithScope
 	{
 		private readonly IIndexingQueue indexingQueue;
 		private readonly ITextExtractor textExtractor;
-		private readonly IDocumentStorage documentStorage;
+		private readonly ILogger<DocumentProcessorWorker> logger;
 
-		public DocumentProcessorWorker(IIndexingQueue indexingQueue, ITextExtractor textExtractor, IDocumentStorage documentStorage)
+		public DocumentProcessorWorker(
+			IIndexingQueue indexingQueue,
+			ITextExtractor textExtractor,
+			ILogger<DocumentProcessorWorker> logger,
+			IServiceProvider serviceProvider)
+			: base(serviceProvider)
 		{
 			this.indexingQueue = indexingQueue ?? throw new ArgumentNullException(nameof(indexingQueue));
 			this.textExtractor = textExtractor ?? throw new ArgumentNullException(nameof(textExtractor));
-			this.documentStorage = documentStorage ?? throw new ArgumentNullException(nameof(documentStorage));
+			this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+		protected override async Task ExecuteWithScopeAsync(IServiceProvider serviceProvider, CancellationToken stoppingToken)
 		{
+			var documentStorage = serviceProvider.GetRequiredService<IDocumentStorage>();
+
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				var document = await indexingQueue.Dequeue(stoppingToken);
-				var extractedText = await textExtractor.Extract(document.FileName, document.Content, stoppingToken);
-				await documentStorage.SaveDocumentToDb(document, extractedText);
+
+				try
+				{
+					logger.LogInformation("Start processing document {documentId} ({documentFileName})", document.Id, document.FileName);
+					var extractedText = await textExtractor.Extract(document.FileName, document.Content, stoppingToken);
+					await documentStorage.SaveDocumentToDb(new FullDocumentInfo(document, extractedText), stoppingToken);
+				}
+				catch (Exception e)
+				{
+					logger.LogError(e, "Error while processing document {documentId} ({documentFileName})", document.Id, document.FileName);
+				}
 			}
 		}
 	}

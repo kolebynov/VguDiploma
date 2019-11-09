@@ -2,15 +2,16 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Interfaces;
+using Diploma.Shared.Interfaces;
 
 namespace Diploma.IndexingService.Core.Internal
 {
-	public class TextExtractor : ITextExtractor
+	internal class TextExtractor : ITextExtractor
 	{
-		public Task<string> Extract(string fileName, IContent content, CancellationToken cancellationToken)
+		public async Task<string> Extract(string fileName, IContent content, CancellationToken cancellationToken)
 		{
-			using var textReader = new StreamReader(content.OpenReadStream());
-			return textReader.ReadToEndAsync();
+			using var textReader = new StreamReader(await content.OpenReadStream(cancellationToken));
+			return await textReader.ReadToEndAsync();
 		}
 	}
 }

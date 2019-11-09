@@ -2,11 +2,11 @@
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Api.Internal;
-using Diploma.IndexingService.Core;
 using Diploma.IndexingService.Core.Configuration;
+using Diploma.IndexingService.Core.Extensions;
 using Diploma.IndexingService.Core.Interfaces;
-using Diploma.IndexingService.Core.Internal;
-using Diploma.IndexingService.DocumentStorage.Extensions;
+using Diploma.IndexingService.EsDocumentStorage.Configuration;
+using Diploma.IndexingService.EsDocumentStorage.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -28,22 +28,23 @@ namespace Diploma.IndexingService.Api
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IndexingQueue).Assembly);
+			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IIndexingQueue).Assembly);
 
 			services.AddMvcCore(opt => opt.EnableEndpointRouting = false)
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-			services.AddHostedService<DocumentProcessorWorker>();
-			services.AddHostedService(sp => (TempContentStorage)sp.GetRequiredService<ITempContentStorage>());
+			services.AddHostedService<TempContentBackgroundService>();
 
-			services.AddSingleton<ITempContentStorage, TempContentStorage>();
-			services.AddSingleton<IIndexingQueue, IndexingQueue>();
-			services.AddSingleton<ITextExtractor, TextExtractor>();
+			services.AddScoped<ITempContentStorage, TempContentStorage>();
 
-			services.AddDocumentStorage("123");
+			services.AddCoreServices();
+			services.AddEsDocumentStorage();
 
+			services.Configure<CoreOptions>(Configuration);
 			services.Configure<IndexingQueueOptions>(Configuration.GetSection("indexingQueue"));
+			services.Configure<ContentStorageOptions>(Configuration.GetSection("contentStorage"));
 			services.Configure<TempContentStorageOptions>(Configuration.GetSection("tempContentStorage"));
+			services.Configure<DocumentStorageOptions>(Configuration.GetSection("documentStorage"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

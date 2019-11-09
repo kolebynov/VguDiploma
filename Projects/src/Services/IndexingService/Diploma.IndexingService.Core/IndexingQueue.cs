@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace Diploma.IndexingService.Core
 {
-	public class IndexingQueue : IIndexingQueue
+	internal class IndexingQueue : IIndexingQueue
 	{
 		private readonly Channel<DocumentInfo> channel;
 

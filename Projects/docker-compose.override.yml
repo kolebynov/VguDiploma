@@ -8,7 +8,7 @@ services:
   diploma.indexingservice.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - connectionStrings:msSqlServer=Server=mssql;Database=IndexingService
-      - connectionStrings:elasticsearch=http://elasticsearch:9200
+      - contentStorage:msSqlConnectionString=Server=mssql;Database=ContentStorage
+      - documentStorage:elasticSearchUri=http://elasticsearch:9200
     ports:
       - "90:80"

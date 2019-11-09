@@ -2,6 +2,6 @@
 {
 	public class IndexingQueueOptions
 	{
-		public int QueueMaxSize { get; set; }
+		public int QueueMaxSize { get; set; } = 100;
 	}
 }

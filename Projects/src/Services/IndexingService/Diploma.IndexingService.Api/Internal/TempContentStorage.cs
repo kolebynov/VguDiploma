@@ -1,94 +1,46 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Exceptions;
 using Diploma.IndexingService.Api.Interfaces;
+using Diploma.IndexingService.Core.Exceptions;
 using Diploma.IndexingService.Core.Interfaces;
-using Diploma.IndexingService.Core.Internal;
-using Microsoft.Extensions.Hosting;
+using Diploma.Shared.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Diploma.IndexingService.Api.Internal
 {
-	public class TempContentStorage : BackgroundService, ITempContentStorage
+	public class TempContentStorage : ITempContentStorage
 	{
-		private readonly string folderPath = Path.Combine(Path.GetTempPath(), nameof(TempContentStorage));
 		private readonly TempContentStorageOptions options;
+		private readonly IContentStorage contentStorage;
+		private readonly ILogger<TempContentStorage> logger;
 
-		public TempContentStorage(IOptions<TempContentStorageOptions> options)
+		public TempContentStorage(
+			IOptions<TempContentStorageOptions> options,
+			IContentStorage contentStorage,
+			ILogger<TempContentStorage> logger)
 		{
+			this.contentStorage = contentStorage ?? throw new ArgumentNullException(nameof(contentStorage));
+			this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 			this.options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
-			if (!Directory.Exists(folderPath))
-			{
-				Directory.CreateDirectory(folderPath);
-			}
 		}
 
-		public async Task<string> SaveTempContent(IContent content)
+		public async Task<string> SaveTempContent(IContent content, CancellationToken cancellationToken) => 
+			(await contentStorage.Save(Guid.NewGuid().ToString(), options.ContentCategory, content, cancellationToken)).Id;
+
+		public async Task<IContent> GetTempContent(string token, CancellationToken cancellationToken)
 		{
-			await using var contentStream = content.OpenReadStream();
-
-			var token = Enumerable.Range(0, options.MaxFileNumber)
-				.Select(i => $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}-{i}")
-				.First(t =>
-				{
-					try
-					{
-						new FileStream(GetFullPath(t), FileMode.CreateNew).Dispose();
-						return true;
-					}
-					catch (IOException)
-					{
-						return false;
-					}
-				});
-
-			await using (var file = File.OpenWrite(GetFullPath(token)))
+			try
 			{
-				await contentStream.CopyToAsync(file);
+				return (await contentStorage.Get(token, options.ContentCategory, cancellationToken)).Content;
 			}
-
-			return token;
-		}
-
-		public Task<IContent> GetTempContent(string token)
-		{
-			var path = GetFullPath(token);
-			if (!File.Exists(path))
+			catch (ContentNotFoundException e)
 			{
-				throw new TempContentRemovedException();
-			}
-
-			return Task.FromResult((IContent)new FileContent(path));
-		}
-
-		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-		{
-			while (!stoppingToken.IsCancellationRequested)
-			{
-				RemoveExpiredContent();
-				await Task.Delay(options.CheckTimeout, stoppingToken);
+				throw new TempContentRemovedException("Temp content not found or has been removed by timeout", e);
 			}
 		}
-
-		private void RemoveExpiredContent()
-		{
-			foreach (var filePath in Directory.EnumerateFiles(folderPath))
-			{
-				var parts = Path.GetFileName(filePath).Split('-');
-				if (parts.Length == 2
-					&& long.TryParse(parts[0], out var unixTimestamp)
-					&& DateTimeOffset.FromUnixTimeMilliseconds(unixTimestamp).Add(options.ContentSavePeriod) <= DateTimeOffset.UtcNow)
-				{
-					File.Delete(filePath);
-				}
-			}
-		}
-
-		private string GetFullPath(string token) => Path.Combine(folderPath, token);
 	}
 }

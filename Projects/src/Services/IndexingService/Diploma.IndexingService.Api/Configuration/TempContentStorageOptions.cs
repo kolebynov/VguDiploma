@@ -1,4 +1,5 @@
 ﻿using System;
+using Diploma.IndexingService.Api.Internal;
 
 namespace Diploma.IndexingService.Api.Configuration
 {
@@ -8,6 +9,6 @@ namespace Diploma.IndexingService.Api.Configuration
 
 		public TimeSpan CheckTimeout { get; set; } = TimeSpan.FromMinutes(1);
 
-		public int MaxFileNumber { get; set; } = 100;
+		public string ContentCategory { get; set; } = nameof(TempContentStorage);
 	}
 }

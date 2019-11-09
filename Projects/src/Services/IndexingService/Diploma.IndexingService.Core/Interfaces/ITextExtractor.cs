@@ -1,6 +1,6 @@
-﻿using System.IO;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Diploma.Shared.Interfaces;
 
 namespace Diploma.IndexingService.Core.Interfaces
 {

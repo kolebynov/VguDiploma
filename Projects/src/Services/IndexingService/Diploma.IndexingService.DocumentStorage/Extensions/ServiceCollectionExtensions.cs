@@ -1,22 +1,32 @@
 ﻿using System;
 using Diploma.IndexingService.Core.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using Diploma.IndexingService.EsDocumentStorage.Configuration;
+using Elasticsearch.Net;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Nest;
+using Nest.JsonNetSerializer;
 
-namespace Diploma.IndexingService.DocumentStorage.Extensions
+namespace Diploma.IndexingService.EsDocumentStorage.Extensions
 {
 	public static class ServiceCollectionExtensions
 	{
-		public static IServiceCollection AddDocumentStorage(this IServiceCollection services, string mssqlConnectionString)
+		public static IServiceCollection AddEsDocumentStorage(this IServiceCollection services)
 		{
 			if (services == null)
 			{
 				throw new ArgumentNullException(nameof(services));
 			}
 
-			services.AddDbContext<DbContext>(opt => opt.UseInMemoryDatabase("123"), ServiceLifetime.Singleton);
-				
-			services.AddSingleton<IDocumentStorage, DocumentStorage>();
+			services.AddSingleton<IElasticClient>(sp =>
+			{
+				var options = sp.GetRequiredService<IOptions<DocumentStorageOptions>>().Value;
+				var pool = new SingleNodeConnectionPool(options.ElasticSearchUri);
+				var connectionSettings = new ConnectionSettings(pool, JsonNetSerializer.Default);
+
+				return new ElasticClient(connectionSettings);
+			});
+			services.AddScoped<IDocumentStorage, DocumentStorage>();
 
 			return services;
 		}

@@ -23,5 +23,18 @@ namespace Diploma.IndexingService.Core.Objects
 			Id = id;
 			UserIdentity = userIdentity;
 		}
+
+		public DocumentIdentity FromString(string stringId)
+		{
+			var lastIndex = stringId.LastIndexOf('_');
+			if (lastIndex < 0)
+			{
+				throw new FormatException("Input string doesn't have separator");
+			}
+
+			return new DocumentIdentity(stringId.Substring(0, lastIndex), stringId.Substring(lastIndex + 1));
+		}
+
+		public override string ToString() => $"{Id}_{UserIdentity}";
 	}
 }

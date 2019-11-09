@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Diploma.Api.Shared.Dto;
 using Diploma.IndexingService.Api.Dto;
@@ -33,7 +34,7 @@ namespace Diploma.IndexingService.Api.Controllers
 			var documentsToAdd = new List<DocumentInfo>();
 			foreach (var documentDto in documents)
 			{
-				var content = await tempContentStorage.GetTempContent(documentDto.ContentToken);
+				var content = await tempContentStorage.GetTempContent(documentDto.ContentToken, CancellationToken.None);
 				documentsToAdd.Add(documentDto.ToDocumentInfo(content));
 			}
 
@@ -46,7 +47,7 @@ namespace Diploma.IndexingService.Api.Controllers
 			var tokens = new List<string>();
 			foreach (var file in files)
 			{
-				tokens.Add(await tempContentStorage.SaveTempContent(new FormFileContent(file)));
+				tokens.Add(await tempContentStorage.SaveTempContent(new FormFileContent(file), CancellationToken.None));
 			}
 
 			return ApiResult.SuccessResultWithData((IEnumerable<string>)tokens);

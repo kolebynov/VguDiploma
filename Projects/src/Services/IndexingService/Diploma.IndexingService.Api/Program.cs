@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore;
+﻿using Diploma.IndexingService.Core.Extensions;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Diploma.IndexingService.Api
@@ -7,7 +8,9 @@ namespace Diploma.IndexingService.Api
 	{
 		public static void Main(string[] args)
 		{
-			CreateWebHostBuilder(args).Build().Run();
+			var webHost = CreateWebHostBuilder(args).Build();
+			webHost.Services.MigrateContentDatabase();
+			webHost.Run();
 		}
 
 		public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

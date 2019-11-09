@@ -1,42 +1,49 @@
 ﻿using System;
-using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
+using Diploma.IndexingService.EsDocumentStorage.Configuration;
+using Microsoft.Extensions.Options;
+using Nest;
+using DocumentInfo = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfo;
 
-namespace Diploma.IndexingService.DocumentStorage
+namespace Diploma.IndexingService.EsDocumentStorage
 {
 	internal class DocumentStorage : IDocumentStorage
 	{
-		private readonly DbContext dbContext;
+		private const string ContentCategory = nameof(DocumentStorage);
 
-		public DocumentStorage(DbContext dbContext)
+		private readonly IElasticClient elasticClient;
+		private readonly DocumentStorageOptions options;
+		private readonly IContentStorage contentStorage;
+
+		public DocumentStorage(IElasticClient elasticClient, IOptions<DocumentStorageOptions> options, IContentStorage contentStorage)
 		{
-			this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+			this.elasticClient = elasticClient ?? throw new ArgumentNullException(nameof(elasticClient));
+			this.contentStorage = contentStorage ?? throw new ArgumentNullException(nameof(contentStorage));
+			this.options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
 
-		public async Task SaveDocumentToDb(DocumentInfo document, string text)
+		public async Task SaveDocumentToDb(FullDocumentInfo document, CancellationToken cancellationToken)
 		{
-			var dbDocument = await dbContext.Documents.FindAsync(document.Id.Id, document.Id.UserIdentity);
-			if (dbDocument == null)
+			var response = await elasticClient.IndexAsync(new IndexRequest<DocumentInfo>(options.IndexName, document.Id.ToString())
 			{
-				dbDocument = new Models.DocumentInfo { Id = document.Id.Id, UserIdentity = document.Id.UserIdentity };
-				dbContext.Documents.Add(dbDocument);
-			}
-			else
+				Document = new DocumentInfo
+				{
+					Id = document.Id,
+					ModificationDate = document.ModificationDate,
+					FileName = document.FileName,
+					Text = document.ExtractedText
+				}
+			}, cancellationToken);
+
+			if (!response.IsValid)
 			{
-				dbContext.Documents.Update(dbDocument);
+				throw new InvalidOperationException("error");
 			}
 
-			dbDocument.ModificationDate = document.ModificationDate;
-			dbDocument.FileName = document.FileName;
-
-			await using var stream = document.Content.OpenReadStream();
-			await using var memoryStream = new MemoryStream();
-			await stream.CopyToAsync(memoryStream);
-			dbDocument.Content = memoryStream.ToArray();
-
-			await dbContext.SaveChangesAsync();
+			await contentStorage.Save(document.Id.ToString(), ContentCategory, document.Content, cancellationToken);
 		}
 	}
 }

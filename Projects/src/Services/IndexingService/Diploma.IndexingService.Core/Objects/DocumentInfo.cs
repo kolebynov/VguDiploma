@@ -1,5 +1,5 @@
 ﻿using System;
-using Diploma.IndexingService.Core.Interfaces;
+using Diploma.Shared.Interfaces;
 
 namespace Diploma.IndexingService.Core.Objects
 {

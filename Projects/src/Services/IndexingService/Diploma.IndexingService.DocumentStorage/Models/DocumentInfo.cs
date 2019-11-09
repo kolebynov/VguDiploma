@@ -1,17 +1,16 @@
 ﻿using System;
+using Diploma.IndexingService.Core.Objects;
 
-namespace Diploma.IndexingService.DocumentStorage.Models
+namespace Diploma.IndexingService.EsDocumentStorage.Models
 {
 	internal class DocumentInfo
 	{
-		public string Id { get; set; }
-
-		public string UserIdentity { get; set; }
+		public DocumentIdentity Id { get; set; }
 
 		public string FileName { get; set; }
 
 		public DateTimeOffset ModificationDate { get; set; }
 
-		public byte[] Content { get; set; }
+		public string Text { get; set; }
 	}
 }
