@@ -31,6 +31,7 @@ namespace Diploma.IndexingService.Api
 			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IIndexingQueue).Assembly);
 
 			services.AddMvcCore(opt => opt.EnableEndpointRouting = false)
+				.AddCors()
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
 			services.AddHostedService<TempContentBackgroundService>();
@@ -52,6 +53,7 @@ namespace Diploma.IndexingService.Api
 		{
 			if (env.EnvironmentName == "Development")
 			{
+				app.UseCors(builder => builder.AllowAnyOrigin());
 				app.UseDeveloperExceptionPage();
 			}
 

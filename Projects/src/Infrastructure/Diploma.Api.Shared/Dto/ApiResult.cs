@@ -8,7 +8,7 @@ namespace Diploma.Api.Shared.Dto
 		[DataMember]
 		public bool Success { get; set; }
 
-		[DataMember(EmitDefaultValue = false)]
+		[DataMember(EmitDefaultValue = true)]
 		public ApiError Error { get; set; }
 
 		public static ApiResult SuccessResult { get; } = new ApiResult
@@ -33,7 +33,7 @@ namespace Diploma.Api.Shared.Dto
 	[DataContract]
 	public class ApiResult<TData> : ApiResult
 	{
-		[DataMember(EmitDefaultValue = false)]
+		[DataMember(EmitDefaultValue = true)]
 		public TData Data { get; set; }
 	}
 }
