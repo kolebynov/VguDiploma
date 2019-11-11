@@ -2,21 +2,23 @@ import React, { FunctionComponent, memo, useState, useEffect } from 'react';
 import { resources } from "@app/utilities/resources";
 import { TextField, Button } from '@material-ui/core';
 import axios from "axios";
+import { SearchResultList } from "@app/components";
+import { FoundDocument, ApiResult } from '@app/models';
 
 const resourceSet = resources.getResourceSet("search");
 
-const SearchComponent: FunctionComponent = memo(() => {
+const Search: FunctionComponent = memo(() => {
     const [state, setState] = useState({
         searchString: "",
-        searchResult: ""
+        searchResult: new Array<FoundDocument>()
     });
 
     const onSearchButtonClick = () => {
-        axios(`http://localhost:5000/api/search?searchString=${state.searchString}`)
+        axios.get<ApiResult<FoundDocument[]>>(`/api/search?searchString=${state.searchString}`)
             .then(response => {
                 setState({
                     ...state,
-                    searchResult: JSON.stringify(response.data, null, "    ")
+                    searchResult: response.data.data 
                 });
             });
     };
@@ -35,10 +37,10 @@ const SearchComponent: FunctionComponent = memo(() => {
                 <Button variant="contained" onClick={onSearchButtonClick}>{resourceSet.getLocalizableValue("search_button_text")}</Button>
             </div>
             <div>
-                <pre>{state.searchResult}</pre>
+                <SearchResultList foundDocuments={state.searchResult} />
             </div>
         </div>
     );
 });
 
-export default SearchComponent;
+export { Search };

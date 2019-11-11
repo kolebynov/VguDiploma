@@ -1,2 +1,3 @@
 export * from './app.component';
-export * from './search';
+export * from './search/search.component';
+export * from './searchResultList/searchResultList.component';

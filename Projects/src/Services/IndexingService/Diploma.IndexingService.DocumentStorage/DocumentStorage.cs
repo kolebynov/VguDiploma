@@ -60,13 +60,14 @@ namespace Diploma.IndexingService.EsDocumentStorage
 							.Query(searchQuery.SearchString)))
 					.Highlight(hs => hs
 						.Fields(hfd => hfd.Field("text"), hfd => hfd.Field("fileName")))
-					.Source(false),
+					.Source(sfd => sfd.Includes(fd => fd.Field("fileName"))),
 				cancellationToken);
 
 			return response.Hits.Select(hit => new FoundDocument
 			{
 				DocumentId = DocumentIdentity.FromString(hit.Id),
-				Matches = hit.Highlight
+				Matches = hit.Highlight,
+				FileName = hit.Source.FileName
 			}).ToArray();
 		}
 	}
