@@ -1,5 +1,7 @@
 import React, { FunctionComponent, memo, useState, useEffect } from 'react';
 import { FoundDocument } from "@app/models";
+import { List, ListItem } from '@material-ui/core';
+import { SearchResultListItem } from '../searchResultListItem/searchResultListItem.component';
 
 interface SearchResultListProps {
     foundDocuments: FoundDocument[];
@@ -7,25 +9,11 @@ interface SearchResultListProps {
 
 const SearchResultList: FunctionComponent<SearchResultListProps> = memo((props) => {
     return (
-        <div>
+        <List>
             {props.foundDocuments.map(doc => (
-                <div key={doc.id}>
-                    <div>
-                        Id: {doc.id}
-                    </div>
-                    <div>
-                        FileName: {doc.fileName}
-                    </div>
-                    <div>
-                        {Object.getOwnPropertyNames(doc.matches).map(key => (
-                            <div key={key}>
-                                {key}: {doc.matches[key].join("\n")}
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                <SearchResultListItem key={doc.id} document={doc} />
             ))}
-        </div>
+        </List>
     );
 });
 
