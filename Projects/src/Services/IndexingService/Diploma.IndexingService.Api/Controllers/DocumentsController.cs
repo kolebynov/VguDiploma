@@ -49,7 +49,8 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ApiResult> AddDocuments([FromBody] IReadOnlyCollection<AddDocument> documents)
+		public async Task<ApiResult<IReadOnlyCollection<AddDocumentResult>>> AddDocuments(
+			[FromBody]IReadOnlyCollection<AddDocument> documents)
 		{
 			var documentsToAdd = new List<DocumentInfo>();
 			var currentUser = await userService.GetCurrentUser();
@@ -60,8 +61,16 @@ namespace Diploma.IndexingService.Api.Controllers
 				documentsToAdd.Add(documentDto.ToDocumentInfo(content, currentUser));
 			}
 
-			await mediator.Send(new AddDocumentsCommand(documentsToAdd));
-			return ApiResult.SuccessResult;
+			var result = (await mediator.Send(new AddDocumentsCommand(documentsToAdd)));
+			return ApiResult.SuccessResultWithData(
+				(IReadOnlyCollection<AddDocumentResult>)result
+					.States
+					.Select(x => new AddDocumentResult
+					{
+						Id = x.Key.GetClientId(),
+						State = x.Value
+					})
+					.ToArray());
 		}
 
 		[HttpPost("upload")]

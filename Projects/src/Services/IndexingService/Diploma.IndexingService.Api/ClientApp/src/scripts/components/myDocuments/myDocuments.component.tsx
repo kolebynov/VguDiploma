@@ -1,19 +1,19 @@
 import React, { FunctionComponent, memo, useState, useEffect } from "react";
-import { Document, ApiResult } from "@app/models";
+import { GetDocument, ApiResult } from "@app/models";
 import axios from "axios";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
 
 const MyDocuments: FunctionComponent = memo(() => {
     var [state, setState] = useState({
-        documents: new Array<Document>()
+        documents: new Array<GetDocument>()
     });
 
     useEffect(() => {
-        axios.get<ApiResult<Array<Document>>>("/api/documents")
+        axios.get<ApiResult<Array<GetDocument>>>("/api/documents")
             .then(response => setState({
                 documents: response.data.data
             }));
-    }, state.documents);
+    }, []);
 
     return (
         <div>

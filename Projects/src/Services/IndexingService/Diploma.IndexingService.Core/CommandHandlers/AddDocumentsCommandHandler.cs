@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Commands;
 using Diploma.IndexingService.Core.Interfaces;
+using Diploma.IndexingService.Core.Objects;
 using MediatR;
 
 namespace Diploma.IndexingService.Core.CommandHandlers
@@ -20,7 +22,7 @@ namespace Diploma.IndexingService.Core.CommandHandlers
 		{
 			await indexingQueue.Enqueue(request.Documents, cancellationToken);
 			
-			return new AddDocumentsResult();
+			return new AddDocumentsResult(request.Documents.ToDictionary(x => x.Id, x => InProcessDocumentState.InQueue));
 		}
 	}
 }

@@ -1,7 +1,14 @@
-interface Document {
+interface GetDocument {
     id: string;
     fileName: string;
     modificationDate: Date;
 }
 
-export { Document };
+interface AddDocument {
+    id: string;
+    fileName: string;
+    modificationDate: Date;
+    contentToken: string;
+}
+
+export { GetDocument, AddDocument };

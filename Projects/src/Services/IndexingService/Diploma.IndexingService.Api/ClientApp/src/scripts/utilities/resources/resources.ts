@@ -21,5 +21,11 @@ export default new Resources({
     search: new ResourceSet({
         "search_title": "Поиск",
         "search_button_text": "Найти"
+    }),
+    uploadDocuments: new ResourceSet({
+        "upload_button_title": "Upload"
+    }),
+    myDocuments: new ResourceSet({
+
     })
 });
