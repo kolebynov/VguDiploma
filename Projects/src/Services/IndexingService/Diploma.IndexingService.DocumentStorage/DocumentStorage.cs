@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Interfaces;
+using Diploma.IndexingService.Core.Internal;
 using Diploma.IndexingService.Core.Objects;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
 using Microsoft.Extensions.Options;
@@ -69,6 +70,28 @@ namespace Diploma.IndexingService.EsDocumentStorage
 				Matches = hit.Highlight,
 				FileName = hit.Source.FileName
 			}).ToArray();
+		}
+
+		public async Task<IReadOnlyCollection<Core.Objects.DocumentInfo>> GetDocuments(User user, int limit, int skip,
+			CancellationToken cancellationToken)
+		{
+			var response = await elasticClient.SearchAsync<DocumentInfo>(
+				sd => sd
+					.Index(options.IndexName)
+					.Query(qd => qd
+						.Term("id.userIdentity.keyword", user.Id))
+					.Source(sfd => sfd.Excludes(fd => fd.Field("text")))
+					.Take(limit)
+					.Skip(skip),
+				cancellationToken);
+
+			return response.Hits.Select(x => new Core.Objects.DocumentInfo(
+					x.Source.Id,
+					x.Source.FileName,
+					x.Source.ModificationDate,
+					new LazyContent(async () =>
+						(await contentStorage.Get(x.Source.Id.ToString(), ContentCategory, cancellationToken)).Content)))
+				.ToArray();
 		}
 	}
 }

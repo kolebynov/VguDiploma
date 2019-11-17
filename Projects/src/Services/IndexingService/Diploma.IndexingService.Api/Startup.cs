@@ -5,6 +5,7 @@ using Diploma.IndexingService.Api.Internal;
 using Diploma.IndexingService.Core.Configuration;
 using Diploma.IndexingService.Core.Extensions;
 using Diploma.IndexingService.Core.Interfaces;
+using Diploma.IndexingService.Core.Objects;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
 using Diploma.IndexingService.EsDocumentStorage.Extensions;
 using MediatR;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 
 namespace Diploma.IndexingService.Api
 {
@@ -37,6 +39,15 @@ namespace Diploma.IndexingService.Api
 			services.AddHostedService<TempContentBackgroundService>();
 
 			services.AddScoped<ITempContentStorage, TempContentStorage>();
+
+			services.AddSingleton(sp =>
+			{
+				var mock = new Mock<IUserService>();
+				mock.Setup(x => x.GetCurrentUser())
+					.ReturnsAsync(new User("123"));
+
+				return mock.Object;
+			});
 
 			services.AddCoreServices();
 			services.AddEsDocumentStorage();

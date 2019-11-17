@@ -96,7 +96,7 @@ namespace Diploma.IndexingService.Core.Internal.ContentStorage
 					.ToArrayAsync(cancellationToken))
 					.Select(x => new ContentStorageItem(
 						x.Id, x.Category,
-						new ByteArrayContent(async () => (await Find(x.Id, x.Category, CancellationToken.None)).Content),
+						new LazyContent(async () => new ByteArrayContent((await Find(x.Id, x.Category, CancellationToken.None)).Content)),
 						x.Timestamp))
 					.ToArray();
 
