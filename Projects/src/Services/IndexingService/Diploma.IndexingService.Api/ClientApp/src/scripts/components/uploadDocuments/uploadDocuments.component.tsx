@@ -1,6 +1,7 @@
 import React, { FunctionComponent, memo, useState } from "react";
 import { resources } from "@app/utilities/resources";
-import { Button } from "@material-ui/core";
+import { Button, Fab } from "@material-ui/core";
+import { AddCircle } from "@material-ui/icons";
 import { UploadDocumentItem } from "./uploadDocumentItem.component";
 import axios from "axios";
 import { ApiResult, InProcessDocumentState, AddDocument } from "@app/models";
@@ -14,22 +15,29 @@ interface UploadDocumentsResult {
 
 const UploadDocuments: FunctionComponent = memo(() => {
     const [state, setState] = useState({
-        file: null as File
+        files: new Array<File>()
     });
 
-    const onFileChange = (file: File) => {
+    const setFile = (index: number, file: File) => {
+        state.files[index] = file;
+
         setState({
-            file: file
+            files: state.files
         });
     };
 
     const upload = () => {
-        if (!state.file) {
+        uploadFile(0);
+    };
+
+    const uploadFile = (index: number): void => {
+        const file = state.files[index];
+        if (!file) {
             return;
         }
 
         const formData = new FormData();
-        formData.append("files", state.file);
+        formData.append("files", file);
         axios
             .post<ApiResult<string[]>>("/api/documents/upload", formData, {
                 headers: {
@@ -38,18 +46,32 @@ const UploadDocuments: FunctionComponent = memo(() => {
             })
             .then(({ data: { data: [contentToken] } }) => {
                 const addDocument: AddDocument = {
-                    id: `${state.file.name}_${state.file.size}`,
-                    fileName: state.file.name,
-                    modificationDate: new Date(state.file.lastModified),
+                    id: `${file.name}_${file.size}`,
+                    fileName: file.name,
+                    modificationDate: new Date(file.lastModified),
                     contentToken: contentToken
                 };
                 return axios.post<ApiResult<UploadDocumentsResult[]>>(`/api/documents`, [addDocument]);
-            });
+            })
+            .then(() => uploadFile(index + 1));
+    };
+
+    const addUploadItem = () => {
+        state.files.push(null);
+
+        setState({
+            files: state.files
+        });
     };
 
     return (
         <div>
-            <UploadDocumentItem onFileChange={onFileChange} defaultFile={state.file}/>
+            {state.files.map((file, index) => (
+                <UploadDocumentItem key={index} defaultFile={file} onFileChange={file => setFile(index, file)} />
+            ))}
+            <Fab color="primary" aria-label="add" onClick={addUploadItem}>
+                <AddCircle />
+            </Fab>
             <Button variant="contained" onClick={upload}>{resourceSet.getLocalizableValue("upload_button_title")}</Button>
         </div>
     );

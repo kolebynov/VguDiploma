@@ -1,10 +1,9 @@
-import React, { FunctionComponent, memo, ChangeEvent, SyntheticEvent } from "react";
+import React, { FunctionComponent, memo, ChangeEvent } from "react";
 import { Input } from "@material-ui/core";
 
 interface UploadDocumentItemProps {
     defaultFile?: File;
     onFileChange: (file: File) => void;
-    onDelete?: () => void;
 };
 
 const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(props => {
