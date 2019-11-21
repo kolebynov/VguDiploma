@@ -23,7 +23,8 @@ export default new Resources({
         "search_button_text": "Найти"
     }),
     uploadDocuments: new ResourceSet({
-        "upload_button_title": "Upload"
+        "upload_button_title": "Upload",
+        "add_documents_title": "Add documents"
     }),
     myDocuments: new ResourceSet({
 

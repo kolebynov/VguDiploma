@@ -2,22 +2,24 @@ import React, { FunctionComponent, memo, ChangeEvent } from "react";
 import { Input } from "@material-ui/core";
 
 interface UploadDocumentItemProps {
-    defaultFile?: File;
-    onFileChange: (file: File) => void;
+    fileName: string;
+    state: UploadItemState;
 };
 
+enum UploadItemState {
+    Idle,
+    Uploading,
+    Uploaded,
+    Error
+}
+
 const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(props => {
-    const onFileSelected = ({ target }: ChangeEvent) => {
-        const { files: [file] } = target as HTMLInputElement;
-
-        props.onFileChange(file);
-    };
-
     return (
         <div>
-            <Input type="file" onChange={onFileSelected} defaultValue={props.defaultFile}></Input>
+            <span>{props.fileName}</span>
+            <span>{props.state}</span>
         </div>
     );
 });
 
-export { UploadDocumentItem };
+export { UploadDocumentItem, UploadItemState };

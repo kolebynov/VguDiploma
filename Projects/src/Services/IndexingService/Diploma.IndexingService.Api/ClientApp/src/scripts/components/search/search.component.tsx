@@ -1,9 +1,9 @@
-import React, { FunctionComponent, memo, useState, useEffect } from 'react';
+import React, { FunctionComponent, memo, useState } from 'react';
 import { resources } from "@app/utilities/resources";
 import { TextField, Button } from '@material-ui/core';
-import axios from "axios";
 import { SearchResultList } from "@app/components";
-import { FoundDocument, ApiResult } from '@app/models';
+import { FoundDocument } from '@app/models';
+import { documentService } from '@app/services';
 
 const resourceSet = resources.getResourceSet("search");
 
@@ -14,11 +14,11 @@ const Search: FunctionComponent = memo(() => {
     });
 
     const onSearchButtonClick = () => {
-        axios.get<ApiResult<FoundDocument[]>>(`/api/search?searchString=${state.searchString}`)
-            .then(response => {
+        documentService.search(state.searchString)
+            .then(foundDocuments => {
                 setState({
                     ...state,
-                    searchResult: response.data.data 
+                    searchResult: foundDocuments
                 });
             });
     };

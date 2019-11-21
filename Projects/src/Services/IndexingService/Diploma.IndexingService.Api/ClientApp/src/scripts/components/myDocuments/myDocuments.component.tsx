@@ -1,7 +1,7 @@
 import React, { FunctionComponent, memo, useState, useEffect } from "react";
-import { GetDocument, ApiResult } from "@app/models";
-import axios from "axios";
+import { GetDocument } from "@app/models";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
+import { documentService } from "@app/services";
 
 const MyDocuments: FunctionComponent = memo(() => {
     var [state, setState] = useState({
@@ -9,9 +9,9 @@ const MyDocuments: FunctionComponent = memo(() => {
     });
 
     useEffect(() => {
-        axios.get<ApiResult<Array<GetDocument>>>("/api/documents")
-            .then(response => setState({
-                documents: response.data.data
+        documentService.getDocuments()
+            .then(documents => setState({
+                documents: documents
             }));
     }, []);
 

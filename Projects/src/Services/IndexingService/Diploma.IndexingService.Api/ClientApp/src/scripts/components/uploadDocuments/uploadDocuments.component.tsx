@@ -1,77 +1,72 @@
-import React, { FunctionComponent, memo, useState } from "react";
+import React, { FunctionComponent, memo, useState, ChangeEvent } from "react";
 import { resources } from "@app/utilities/resources";
-import { Button, Fab } from "@material-ui/core";
-import { AddCircle } from "@material-ui/icons";
-import { UploadDocumentItem } from "./uploadDocumentItem.component";
-import axios from "axios";
-import { ApiResult, InProcessDocumentState, AddDocument } from "@app/models";
+import { Button, Fab, Input, makeStyles, createStyles } from "@material-ui/core";
+import { UploadDocumentItem, UploadItemState } from "./uploadDocumentItem.component";
+import { documentService } from "@app/services";
 
 const resourceSet = resources.getResourceSet("uploadDocuments");
+const useStyles = makeStyles(theme => createStyles({
+    selectFiles: {
+        ...theme.typography.button
+    }
+}));
 
-interface UploadDocumentsResult {
-    id: string;
-    state: InProcessDocumentState
+interface SelectedFile {
+    file: File;
+    state: UploadItemState;
+    cancelUploadFunc?: () => void;
 }
 
 const UploadDocuments: FunctionComponent = memo(() => {
     const [state, setState] = useState({
-        files: new Array<File>()
+        selectedFiles: new Array<SelectedFile>()
     });
-
-    const setFile = (index: number, file: File) => {
-        state.files[index] = file;
-
-        setState({
-            files: state.files
-        });
-    };
+    const classes = useStyles({});
 
     const upload = () => {
         uploadFile(0);
     };
 
     const uploadFile = (index: number): void => {
-        const file = state.files[index];
+        const file = state.selectedFiles[index];
         if (!file) {
             return;
         }
 
-        const formData = new FormData();
-        formData.append("files", file);
-        axios
-            .post<ApiResult<string[]>>("/api/documents/upload", formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-            .then(({ data: { data: [contentToken] } }) => {
-                const addDocument: AddDocument = {
-                    id: `${file.name}_${file.size}`,
-                    fileName: file.name,
-                    modificationDate: new Date(file.lastModified),
-                    contentToken: contentToken
-                };
-                return axios.post<ApiResult<UploadDocumentsResult[]>>(`/api/documents`, [addDocument]);
-            })
-            .then(() => uploadFile(index + 1));
-    };
-
-    const addUploadItem = () => {
-        state.files.push(null);
-
+        documentService.addDocument(file.file)
+            .then(() => {
+                file.state = UploadItemState.Uploaded;
+                setState({
+                    selectedFiles: state.selectedFiles
+                });
+                uploadFile(index + 1);
+            });
+        
+        file.state = UploadItemState.Uploading;
         setState({
-            files: state.files
+            selectedFiles: state.selectedFiles
         });
     };
 
+    const onFilesSelected = ({ target }: ChangeEvent) => {
+        const inputTarget = (target as HTMLInputElement);
+        const [...files] = inputTarget.files;
+        setState({
+            selectedFiles: state.selectedFiles.concat(files.map(x => ({
+                file: x,
+                state: UploadItemState.Idle
+            })))
+        });
+
+        inputTarget.value = null;
+    }
+
     return (
         <div>
-            {state.files.map((file, index) => (
-                <UploadDocumentItem key={index} defaultFile={file} onFileChange={file => setFile(index, file)} />
+            {state.selectedFiles.map((file, index) => (
+                <UploadDocumentItem key={index} fileName={file.file.name} state={file.state} />
             ))}
-            <Fab color="primary" aria-label="add" onClick={addUploadItem}>
-                <AddCircle />
-            </Fab>
+            <input type="file" className={classes.selectFiles} multiple onChange={onFilesSelected} />
             <Button variant="contained" onClick={upload}>{resourceSet.getLocalizableValue("upload_button_title")}</Button>
         </div>
     );
