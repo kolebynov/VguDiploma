@@ -1,40 +1,24 @@
 import React, { FunctionComponent, memo, useState, useEffect } from "react";
 import { GetDocument } from "@app/models";
-import { Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
 import { documentService } from "@app/services";
+import { DocumentList, DocumentInfo } from "..";
+import { Drawer } from "@material-ui/core";
 
 const MyDocuments: FunctionComponent = memo(() => {
-    var [state, setState] = useState({
-        documents: new Array<GetDocument>()
-    });
+    var [documents, setDocuments] = useState(new Array<GetDocument>());
+    var [selectedDocument, setSelectedDocument] = useState<GetDocument>(null);
 
     useEffect(() => {
         documentService.getDocuments()
-            .then(documents => setState({
-                documents: documents
-            }));
+            .then(newDocuments => setDocuments(newDocuments));
     }, []);
 
     return (
         <div>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Id</TableCell>
-                        <TableCell>File Name</TableCell>
-                        <TableCell>Modification Date</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {state.documents.map(document => (
-                        <TableRow key={document.id}>
-                            <TableCell>{document.id}</TableCell>
-                            <TableCell>{document.fileName}</TableCell>
-                            <TableCell>{document.modificationDate}</TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+            <DocumentList documents={documents} onDocumentSelect={docId => setSelectedDocument(documents.find(doc => doc.id === docId))}/>
+            <Drawer anchor="right" open={selectedDocument !== null} onClose={() => setSelectedDocument(null)}>
+                {selectedDocument != null ? <DocumentInfo document={selectedDocument} /> : null}
+            </Drawer>
         </div>
     );
 });

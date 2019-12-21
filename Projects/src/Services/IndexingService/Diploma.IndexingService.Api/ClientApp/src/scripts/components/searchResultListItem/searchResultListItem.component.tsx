@@ -11,10 +11,10 @@ const SearchResultListItem: FunctionComponent<SearchResultListItemProps> = memo(
     const text = (document.matches["text"] || []).join(".");
 
     return (
-        <>
+        <div style={{marginBottom: "15px", borderBottom: "1px solid black"}}>
             <div>{fileName}</div>
             <div>{text}</div>
-        </>
+        </div>
     );
 });
 

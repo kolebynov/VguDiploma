@@ -5,3 +5,5 @@ export * from './searchResultListItem/searchResultListItem.component';
 export * from './myDocuments/myDocuments.component';
 export * from './uploadDocuments/uploadDocuments.component';
 export * from './uploadDocuments/uploadDocumentItem.component';
+export * from './documentList/documentList.component';
+export * from './documentInfo/documentInfo.component';

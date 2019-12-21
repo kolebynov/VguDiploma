@@ -23,15 +23,19 @@ const UploadDocuments: FunctionComponent = memo(() => {
     });
     const classes = useStyles({});
 
-    const upload = () => {
-        uploadFile(0);
-    };
-
     const uploadFile = (index: number): void => {
         const file = state.selectedFiles[index];
         if (!file) {
+            setState({
+                selectedFiles: state.selectedFiles.filter(x => x.state != UploadItemState.Uploaded)
+            })
             return;
         }
+
+        file.state = UploadItemState.Uploading;
+        setState({
+            selectedFiles: state.selectedFiles
+        });
 
         documentService.addDocument(file.file)
             .then(() => {
@@ -41,11 +45,6 @@ const UploadDocuments: FunctionComponent = memo(() => {
                 });
                 uploadFile(index + 1);
             });
-        
-        file.state = UploadItemState.Uploading;
-        setState({
-            selectedFiles: state.selectedFiles
-        });
     };
 
     const onFilesSelected = ({ target }: ChangeEvent) => {
@@ -67,7 +66,7 @@ const UploadDocuments: FunctionComponent = memo(() => {
                 <UploadDocumentItem key={index} fileName={file.file.name} state={file.state} />
             ))}
             <input type="file" className={classes.selectFiles} multiple onChange={onFilesSelected} />
-            <Button variant="contained" onClick={upload}>{resourceSet.getLocalizableValue("upload_button_title")}</Button>
+            <Button variant="contained" onClick={() => uploadFile(0)}>{resourceSet.getLocalizableValue("upload_button_title")}</Button>
         </div>
     );
 });

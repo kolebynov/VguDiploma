@@ -26,7 +26,12 @@ export default new Resources({
         "upload_button_title": "Upload",
         "add_documents_title": "Add documents"
     }),
-    myDocuments: new ResourceSet({
-
+    documentInfo: new ResourceSet({
+        "file_name": "File Name",
+        "modification_date": "Modification Date"
+    }),
+    app: new ResourceSet({
+        "my_documents_link": "My Documents",
+        "search_link": "Search"
     })
 });

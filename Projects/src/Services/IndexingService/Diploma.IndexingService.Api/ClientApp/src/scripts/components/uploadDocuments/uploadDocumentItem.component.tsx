@@ -14,10 +14,22 @@ enum UploadItemState {
 }
 
 const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(props => {
+    let textState = "";
+    switch (props.state) {
+        case UploadItemState.Idle:
+            textState = "Ready to upload";
+            break;
+        case UploadItemState.Uploading:
+            textState = "Uploading...";
+            break;
+        case UploadItemState.Uploaded:
+            textState = "Uploaded";
+            break;
+    }
+
     return (
-        <div>
-            <span>{props.fileName}</span>
-            <span>{props.state}</span>
+        <div style={{marginBottom: "10px"}}>
+            <div>{props.fileName} - {textState}</div>
         </div>
     );
 });
