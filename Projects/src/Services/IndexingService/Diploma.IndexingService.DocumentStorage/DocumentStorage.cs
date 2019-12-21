@@ -9,7 +9,7 @@ using Diploma.IndexingService.Core.Objects;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
 using Microsoft.Extensions.Options;
 using Nest;
-using DocumentInfo = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfo;
+using DocumentInfoModel = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfo;
 
 namespace Diploma.IndexingService.EsDocumentStorage
 {
@@ -30,9 +30,9 @@ namespace Diploma.IndexingService.EsDocumentStorage
 
 		public async Task SaveDocumentToDb(FullDocumentInfo document, CancellationToken cancellationToken)
 		{
-			var response = await elasticClient.IndexAsync(new IndexRequest<DocumentInfo>(options.IndexName, document.Id.ToString())
+			var response = await elasticClient.IndexAsync(new IndexRequest<DocumentInfoModel>(options.IndexName, document.Id.ToString())
 			{
-				Document = new DocumentInfo
+				Document = new DocumentInfoModel
 				{
 					Id = document.Id,
 					ModificationDate = document.ModificationDate,
@@ -52,7 +52,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 		public async Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery,
 			CancellationToken cancellationToken)
 		{
-			var response = await elasticClient.SearchAsync<DocumentInfo>(
+			var response = await elasticClient.SearchAsync<DocumentInfoModel>(
 				sd => sd
 					.Index(options.IndexName)
 					.Query(qd => qd
@@ -72,10 +72,10 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			}).ToArray();
 		}
 
-		public async Task<IReadOnlyCollection<Core.Objects.DocumentInfo>> GetDocuments(User user, int limit, int skip,
+		public async Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, int limit, int skip,
 			CancellationToken cancellationToken)
 		{
-			var response = await elasticClient.SearchAsync<DocumentInfo>(
+			var response = await elasticClient.SearchAsync<DocumentInfoModel>(
 				sd => sd
 					.Index(options.IndexName)
 					.Query(qd => qd
@@ -85,13 +85,29 @@ namespace Diploma.IndexingService.EsDocumentStorage
 					.Skip(skip),
 				cancellationToken);
 
-			return response.Hits.Select(x => new Core.Objects.DocumentInfo(
-					x.Source.Id,
-					x.Source.FileName,
-					x.Source.ModificationDate,
-					new LazyContent(async () =>
-						(await contentStorage.Get(x.Source.Id.ToString(), ContentCategory, cancellationToken)).Content)))
-				.ToArray();
+			return response.Hits.Select(x => ToDocumentInfo(x.Source, cancellationToken)).ToArray();
 		}
+
+		public async Task<DocumentInfo> GetDocument(
+			DocumentIdentity id,
+			CancellationToken cancellationToken)
+		{
+			var response = await elasticClient.GetAsync<DocumentInfoModel>(
+				id.ToString(),
+				selector => selector
+					.Index(options.IndexName)
+					.SourceExcludes("text"),
+				cancellationToken);
+
+			return ToDocumentInfo(response.Source, cancellationToken);
+		}
+
+		private DocumentInfo ToDocumentInfo(DocumentInfoModel source, CancellationToken cancellationToken) =>
+			new DocumentInfo(
+				source.Id,
+				source.FileName,
+				source.ModificationDate,
+				new LazyContent(async () =>
+					(await contentStorage.Get(source.Id.ToString(), ContentCategory, cancellationToken)).Content));
 	}
 }

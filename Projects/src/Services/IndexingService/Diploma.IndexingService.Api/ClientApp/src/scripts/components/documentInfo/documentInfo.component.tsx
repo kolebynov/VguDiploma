@@ -1,7 +1,8 @@
 import React, { FunctionComponent, memo } from "react";
 import { GetDocument } from "@app/models";
-import { Card, CardContent, Typography, Divider } from "@material-ui/core";
+import { Card, CardContent, Typography, Divider, CardActions, Button } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
+import { documentService } from "@app/services";
 
 interface DocumentInfoProps {
     document: GetDocument;
@@ -9,7 +10,7 @@ interface DocumentInfoProps {
 
 const resourceSet = resources.getResourceSet("documentInfo");
 
-const DocumentInfo: FunctionComponent<DocumentInfoProps> = memo(({document}) => {
+const DocumentInfo: FunctionComponent<DocumentInfoProps> = memo(({ document }) => {
     return (
         <Card>
             <CardContent>
@@ -27,6 +28,9 @@ const DocumentInfo: FunctionComponent<DocumentInfoProps> = memo(({document}) => 
                     {document.modificationDate}
                 </Typography>
             </CardContent>
+            <CardActions>
+                <Button href={documentService.getContentUri(document.id)}>{resourceSet.getLocalizableValue("download_file")}</Button>
+            </CardActions>
         </Card>
     );
 });

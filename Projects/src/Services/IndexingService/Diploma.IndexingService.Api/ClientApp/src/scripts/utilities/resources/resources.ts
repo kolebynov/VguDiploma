@@ -28,7 +28,8 @@ export default new Resources({
     }),
     documentInfo: new ResourceSet({
         "file_name": "File Name",
-        "modification_date": "Modification Date"
+        "modification_date": "Modification Date",
+        "download_file": "Download"
     }),
     app: new ResourceSet({
         "my_documents_link": "My Documents",

@@ -29,6 +29,10 @@ class DocumentService {
             .then(response => response.data.data);
     }
 
+    public getContentUri(docId: string) {
+        return `/api/documents/${docId}/content`;
+    }
+
     public search(searchString: string): Promise<FoundDocument[]> {
         return axios
             .get<ApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}`)

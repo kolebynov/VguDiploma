@@ -13,5 +13,7 @@ namespace Diploma.IndexingService.Core.Interfaces
 
 		Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, int limit, int skip,
 			CancellationToken cancellationToken);
+
+		Task<DocumentInfo> GetDocument(DocumentIdentity id, CancellationToken cancellationToken);
 	}
 }

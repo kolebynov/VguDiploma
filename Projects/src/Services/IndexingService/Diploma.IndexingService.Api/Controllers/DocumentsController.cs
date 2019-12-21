@@ -14,6 +14,7 @@ using Diploma.IndexingService.Core.Objects;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace Diploma.IndexingService.Api.Controllers
 {
@@ -25,13 +26,20 @@ namespace Diploma.IndexingService.Api.Controllers
 		private readonly ITempContentStorage tempContentStorage;
 		private readonly IUserService userService;
 		private readonly IDocumentStorage documentStorage;
+		private readonly IContentTypeProvider contentTypeProvider;
 
-		public DocumentsController(IMediator mediator, ITempContentStorage tempContentStorage, IUserService userService, IDocumentStorage documentStorage)
+		public DocumentsController(
+			IMediator mediator,
+			ITempContentStorage tempContentStorage,
+			IUserService userService,
+			IDocumentStorage documentStorage,
+			IContentTypeProvider contentTypeProvider)
 		{
 			this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 			this.tempContentStorage = tempContentStorage ?? throw new ArgumentNullException(nameof(tempContentStorage));
 			this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
 			this.documentStorage = documentStorage ?? throw new ArgumentNullException(nameof(documentStorage));
+			this.contentTypeProvider = contentTypeProvider ?? throw new ArgumentNullException(nameof(contentTypeProvider));
 		}
 
 		[HttpGet]
@@ -46,6 +54,24 @@ namespace Diploma.IndexingService.Api.Controllers
 				FileName = x.FileName,
 				ModificationDate = x.ModificationDate
 			}).ToArray());
+		}
+
+		[HttpGet("{documentId}/content")]
+		public async Task<FileStreamResult> GetDocumentContent(string documentId)
+		{
+			var currentUser = await userService.GetCurrentUser();
+			var document = await documentStorage.GetDocument(
+				new DocumentIdentity(documentId, currentUser.Id),
+				CancellationToken.None);
+			contentTypeProvider.TryGetContentType(document.FileName, out var contentType);
+
+			return new FileStreamResult(
+				await document.Content.OpenReadStream(CancellationToken.None),
+				contentType ?? "application/octet-stream")
+			{
+				FileDownloadName = document.FileName,
+				EnableRangeProcessing = true
+			};
 		}
 
 		[HttpPost]
