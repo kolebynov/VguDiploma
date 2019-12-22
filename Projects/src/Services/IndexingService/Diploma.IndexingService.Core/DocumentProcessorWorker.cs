@@ -11,12 +11,12 @@ namespace Diploma.IndexingService.Core
 	internal class DocumentProcessorWorker : BackgroundServiceWithScope
 	{
 		private readonly IIndexingQueue indexingQueue;
-		private readonly ITextExtractor textExtractor;
+		private readonly IDocumentTextExtractor textExtractor;
 		private readonly ILogger<DocumentProcessorWorker> logger;
 
 		public DocumentProcessorWorker(
 			IIndexingQueue indexingQueue,
-			ITextExtractor textExtractor,
+			IDocumentTextExtractor textExtractor,
 			ILogger<DocumentProcessorWorker> logger,
 			IServiceProvider serviceProvider)
 			: base(serviceProvider)

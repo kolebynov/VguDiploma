@@ -1,7 +1,7 @@
 interface GetDocument {
     id: string;
     fileName: string;
-    modificationDate: Date;
+    modificationDate: string;
 }
 
 interface AddDocument {

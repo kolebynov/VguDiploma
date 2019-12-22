@@ -10,7 +10,9 @@ namespace Diploma.IndexingService.Core.Internal
 	{
 		private readonly Lazy<Task<IContent>> innerLazyContent;
 
-		public IContentHash Hash => throw new NotImplementedException();
+		public IContentHash Hash => innerLazyContent.Value.Result.Hash;
+
+		public long Size => innerLazyContent.Value.Result.Size;
 
 		public LazyContent(Func<Task<IContent>> contentProvider)
 		{

@@ -12,6 +12,8 @@ namespace Diploma.IndexingService.Core.Internal
 
 		public IContentHash Hash => throw new NotImplementedException();
 
+		public long Size => byteContent.LongLength;
+
 		public ByteArrayContent(byte[] content)
 		{
 			byteContent = content ?? throw new ArgumentNullException(nameof(content));

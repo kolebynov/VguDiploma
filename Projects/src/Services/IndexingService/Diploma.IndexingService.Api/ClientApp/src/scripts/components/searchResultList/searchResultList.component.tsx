@@ -11,7 +11,9 @@ const SearchResultList: FunctionComponent<SearchResultListProps> = memo((props) 
     return (
         <List>
             {props.foundDocuments.map(doc => (
-                <SearchResultListItem key={doc.id} document={doc} />
+                <ListItem key={doc.id} divider={true}>
+                    <SearchResultListItem document={doc} />
+                </ListItem>
             ))}
         </List>
     );

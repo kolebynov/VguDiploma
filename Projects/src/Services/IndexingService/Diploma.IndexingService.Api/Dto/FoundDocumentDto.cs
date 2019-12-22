@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Diploma.IndexingService.Core.Objects;
 
-namespace Diploma.IndexingService.Core.Objects
+namespace Diploma.IndexingService.Api.Dto
 {
-	public class FoundDocument
+	public class FoundDocumentDto
 	{
-		public DocumentIdentity DocumentId { get; set; }
+		public string Id { get; set; }
 
 		public string FileName { get; set; }
 

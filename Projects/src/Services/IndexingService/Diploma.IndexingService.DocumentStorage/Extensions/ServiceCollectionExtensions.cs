@@ -1,6 +1,8 @@
 ﻿using System;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
+using Diploma.IndexingService.EsDocumentStorage.Interfaces;
+using Diploma.IndexingService.EsDocumentStorage.Internal;
 using Elasticsearch.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -26,6 +28,8 @@ namespace Diploma.IndexingService.EsDocumentStorage.Extensions
 
 				return new ElasticClient(connectionSettings);
 			});
+			services.AddSingleton<ITextHighlighter, TextHighlighter>();
+
 			services.AddScoped<IDocumentStorage, DocumentStorage>();
 
 			return services;

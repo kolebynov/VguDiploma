@@ -1,9 +1,10 @@
 import React, { FunctionComponent, memo, useState } from 'react';
 import { resources } from "@app/utilities/resources";
-import { TextField, Button } from '@material-ui/core';
+import { TextField, Button, Grid } from '@material-ui/core';
 import { SearchResultList } from "@app/components";
 import { FoundDocument } from '@app/models';
 import { documentService } from '@app/services';
+import { Loader } from '../loader/loader.component';
 
 const resourceSet = resources.getResourceSet("search");
 
@@ -12,15 +13,20 @@ const Search: FunctionComponent = memo(() => {
         searchString: "",
         searchResult: new Array<FoundDocument>()
     });
+    const [isSearching, setSearching] = useState(false);
 
     const onSearchButtonClick = () => {
-        documentService.search(state.searchString)
-            .then(foundDocuments => {
-                setState({
-                    ...state,
-                    searchResult: foundDocuments
+        if (state.searchString) {
+            setSearching(true);
+            documentService.search(state.searchString)
+                .then(foundDocuments => {
+                    setState({
+                        ...state,
+                        searchResult: foundDocuments
+                    });
+                    setSearching(false);
                 });
-            });
+        }
     };
 
     const onSearchTextFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,12 +38,12 @@ const Search: FunctionComponent = memo(() => {
 
     return (
         <div>
-            <div>
-                <TextField label={resourceSet.getLocalizableValue("search_title")} value={state.searchString} onChange={onSearchTextFieldChange}/>
+            <div style={{marginBottom: "5px"}}>
+                <TextField label={resourceSet.getLocalizableValue("search_title")} value={state.searchString} onChange={onSearchTextFieldChange} />
                 <Button variant="contained" onClick={onSearchButtonClick}>{resourceSet.getLocalizableValue("search_button_text")}</Button>
             </div>
             <div>
-                <SearchResultList foundDocuments={state.searchResult} />
+                {isSearching ? <Loader /> : <SearchResultList foundDocuments={state.searchResult} />}
             </div>
         </div>
     );

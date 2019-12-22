@@ -2,7 +2,7 @@
 
 namespace Diploma.IndexingService.Api.Dto
 {
-	public class AddDocumentResult
+	public class AddDocumentResultDto
 	{
 		public string Id { get;set; }
 

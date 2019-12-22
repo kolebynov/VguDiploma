@@ -29,7 +29,7 @@ namespace Diploma.IndexingService.Core.Extensions
 						.EnableRetryOnFailure(10)));
 
 			services.AddSingleton<IIndexingQueue, IndexingQueue>();
-			services.AddSingleton<ITextExtractor, TextExtractor>();
+			services.AddSingleton<IDocumentTextExtractor, ToxyDocumentTextExtractor>();
 
 			services.AddScoped<IContentStorage, EfContentStorage>();
 

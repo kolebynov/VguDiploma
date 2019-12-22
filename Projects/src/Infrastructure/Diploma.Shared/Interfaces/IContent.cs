@@ -8,6 +8,8 @@ namespace Diploma.Shared.Interfaces
 	{
 		IContentHash Hash { get; }
 
+		long Size { get; }
+
 		Task<Stream> OpenReadStream(CancellationToken cancellationToken);
 	}
 }

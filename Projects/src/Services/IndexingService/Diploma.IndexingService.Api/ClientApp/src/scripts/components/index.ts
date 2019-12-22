@@ -7,3 +7,4 @@ export * from './uploadDocuments/uploadDocuments.component';
 export * from './uploadDocuments/uploadDocumentItem.component';
 export * from './documentList/documentList.component';
 export * from './documentInfo/documentInfo.component';
+export * from './loader/loader.component';

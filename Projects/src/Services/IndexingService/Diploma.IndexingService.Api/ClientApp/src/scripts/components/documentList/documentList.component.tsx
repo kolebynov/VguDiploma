@@ -2,6 +2,7 @@ import React, { FunctionComponent, memo, useState } from "react";
 import { GetDocument } from "@app/models";
 import { List, ListItem, ListItemText, ListItemIcon } from "@material-ui/core";
 import DescriptionIcon from '@material-ui/icons/Description';
+import { toUiDateTime } from "@app/utilities/dateTimeUtils";
 
 interface DocumentListProps {
     documents: Array<GetDocument>;
@@ -25,7 +26,7 @@ const DocumentList: FunctionComponent<DocumentListProps> = memo((props) => {
                     <ListItemIcon>
                         <DescriptionIcon />
                     </ListItemIcon>
-                    <ListItemText primary={doc.fileName} secondary={doc.modificationDate} />
+                    <ListItemText primary={doc.fileName} secondary={toUiDateTime(doc.modificationDate)} />
                 </ListItem>
             ))}
         </List>

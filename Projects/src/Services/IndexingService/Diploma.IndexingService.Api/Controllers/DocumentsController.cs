@@ -43,12 +43,12 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<GetDocument>>> GetDocuments()
+		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments()
 		{
 			var documents =
 				await documentStorage.GetDocuments(await userService.GetCurrentUser(), 100, 0, CancellationToken.None);
 
-			return ApiResult.SuccessResultWithData((IReadOnlyCollection<GetDocument>)documents.Select(x => new GetDocument
+			return ApiResult.SuccessResultWithData((IReadOnlyCollection<GetDocumentDto>)documents.Select(x => new GetDocumentDto
 			{
 				Id = x.Id.GetClientId(),
 				FileName = x.FileName,
@@ -75,8 +75,8 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ApiResult<IReadOnlyCollection<AddDocumentResult>>> AddDocuments(
-			[FromBody]IReadOnlyCollection<AddDocument> documents)
+		public async Task<ApiResult<IReadOnlyCollection<AddDocumentResultDto>>> AddDocuments(
+			[FromBody]IReadOnlyCollection<AddDocumentDto> documents)
 		{
 			var documentsToAdd = new List<DocumentInfo>();
 			var currentUser = await userService.GetCurrentUser();
@@ -89,9 +89,9 @@ namespace Diploma.IndexingService.Api.Controllers
 
 			var result = (await mediator.Send(new AddDocumentsCommand(documentsToAdd)));
 			return ApiResult.SuccessResultWithData(
-				(IReadOnlyCollection<AddDocumentResult>)result
+				(IReadOnlyCollection<AddDocumentResultDto>)result
 					.States
-					.Select(x => new AddDocumentResult
+					.Select(x => new AddDocumentResultDto
 					{
 						Id = x.Key.GetClientId(),
 						State = x.Value

@@ -8,7 +8,7 @@ using Diploma.IndexingService.Api.Extensions;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using Microsoft.AspNetCore.Mvc;
-using FoundDocument = Diploma.IndexingService.Api.Dto.FoundDocument;
+using FoundDocumentDto = Diploma.IndexingService.Api.Dto.FoundDocumentDto;
 
 namespace Diploma.IndexingService.Api.Controllers
 {
@@ -24,9 +24,9 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<FoundDocument>>> Search(string searchString) => 
+		public async Task<ApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search(string searchString) => 
 			ApiResult.SuccessResultWithData(
-				(IReadOnlyCollection<FoundDocument>)(await documentStorage.Search(new SearchQuery { SearchString = searchString }, CancellationToken.None))
+				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(new SearchQuery { SearchString = searchString }, CancellationToken.None))
 					.Select(DtoExtensions.ToDto)
 					.ToArray());
 	}

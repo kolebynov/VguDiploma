@@ -3,6 +3,7 @@ import { GetDocument } from "@app/models";
 import { Card, CardContent, Typography, Divider, CardActions, Button } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { documentService } from "@app/services";
+import { toUiDateTime } from "@app/utilities/dateTimeUtils";
 
 interface DocumentInfoProps {
     document: GetDocument;
@@ -25,7 +26,7 @@ const DocumentInfo: FunctionComponent<DocumentInfoProps> = memo(({ document }) =
                     {resourceSet.getLocalizableValue("modification_date")}
                 </Typography>
                 <Typography color="textPrimary">
-                    {document.modificationDate}
+                    {toUiDateTime(document.modificationDate)}
                 </Typography>
             </CardContent>
             <CardActions>

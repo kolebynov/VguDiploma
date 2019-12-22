@@ -7,6 +7,7 @@ using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Internal;
 using Diploma.IndexingService.Core.Objects;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
+using Diploma.IndexingService.EsDocumentStorage.Interfaces;
 using Microsoft.Extensions.Options;
 using Nest;
 using DocumentInfoModel = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfo;
@@ -20,11 +21,17 @@ namespace Diploma.IndexingService.EsDocumentStorage
 		private readonly IElasticClient elasticClient;
 		private readonly DocumentStorageOptions options;
 		private readonly IContentStorage contentStorage;
+		private readonly ITextHighlighter textHighlighter;
 
-		public DocumentStorage(IElasticClient elasticClient, IOptions<DocumentStorageOptions> options, IContentStorage contentStorage)
+		public DocumentStorage(
+			IElasticClient elasticClient,
+			IOptions<DocumentStorageOptions> options,
+			IContentStorage contentStorage,
+			ITextHighlighter textHighlighter)
 		{
 			this.elasticClient = elasticClient ?? throw new ArgumentNullException(nameof(elasticClient));
 			this.contentStorage = contentStorage ?? throw new ArgumentNullException(nameof(contentStorage));
+			this.textHighlighter = textHighlighter ?? throw new ArgumentNullException(nameof(textHighlighter));
 			this.options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 		}
 
@@ -37,7 +44,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 					Id = document.Id,
 					ModificationDate = document.ModificationDate,
 					FileName = document.FileName,
-					Text = document.ExtractedText
+					Text = textHighlighter.EscapeText(document.ExtractedText)
 				}
 			}, cancellationToken);
 
@@ -67,7 +74,11 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			return response.Hits.Select(hit => new FoundDocument
 			{
 				DocumentId = DocumentIdentity.FromString(hit.Id),
-				Matches = hit.Highlight,
+				Matches = hit.Highlight
+					.ToDictionary(
+						x => x.Key,
+						x => (IReadOnlyCollection<IReadOnlyCollection<DocumentTextEntry>>)
+							x.Value.Select(y => textHighlighter.ParseHighlightedText(y)).ToArray()),
 				FileName = hit.Source.FileName
 			}).ToArray();
 		}

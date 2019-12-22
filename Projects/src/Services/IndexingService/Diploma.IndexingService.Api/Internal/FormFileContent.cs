@@ -13,6 +13,8 @@ namespace Diploma.IndexingService.Api.Internal
 
 		public IContentHash Hash => throw new NotImplementedException();
 
+		public long Size => formFile.Length;
+
 		public FormFileContent(IFormFile formFile)
 		{
 			this.formFile = formFile ?? throw new ArgumentNullException(nameof(formFile));

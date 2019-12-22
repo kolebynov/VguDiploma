@@ -19,8 +19,10 @@ class Resources {
 
 export default new Resources({
     search: new ResourceSet({
-        "search_title": "Поиск",
-        "search_button_text": "Найти"
+        "search_title": "Search",
+        "search_button_text": "Search",
+        "file_name": "File Name: ",
+        "found_text": "Text: "
     }),
     uploadDocuments: new ResourceSet({
         "upload_button_title": "Upload",
@@ -34,5 +36,8 @@ export default new Resources({
     app: new ResourceSet({
         "my_documents_link": "My Documents",
         "search_link": "Search"
+    }),
+    locale: new ResourceSet({
+        "locale": "en"
     })
 });
