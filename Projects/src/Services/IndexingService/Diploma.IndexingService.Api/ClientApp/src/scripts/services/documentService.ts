@@ -1,10 +1,14 @@
-import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument } from "@app/models";
+import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState } from "@app/models";
 import axios from "axios";
+import { inProgressDocumentService } from "./inProgressDocumentService";
 
 class DocumentService {
-    public addDocument(file: File): Promise<AddDocumentResult> {
+    public addDocument(document: GetDocument, file: File): Promise<AddDocumentResult> {
         const formData = new FormData();
         formData.append("files", file);
+
+        inProgressDocumentService.updateState(document, InProcessDocumentState.Uploading);
+
         return axios
             .post<ApiResult<string[]>>("/api/documents/upload", formData, {
                 headers: {
@@ -12,15 +16,21 @@ class DocumentService {
                 }
             })
             .then(({ data: { data: [contentToken] } }) => {
+                inProgressDocumentService.updateState(document, InProcessDocumentState.Uploaded);
+
                 const addDocument: AddDocument = {
-                    id: `${file.name}_${file.size}`,
+                    id: document.id,
                     fileName: file.name,
                     modificationDate: new Date(file.lastModified),
                     contentToken: contentToken
                 };
                 return axios.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, [addDocument]);
             })
-            .then(response => response.data.data[0]);
+            .then(response => {
+                const result = response.data.data[0];
+                inProgressDocumentService.updateState(document, result.state);
+                return result;
+            });
     }
 
     public getDocuments(): Promise<GetDocument[]> {

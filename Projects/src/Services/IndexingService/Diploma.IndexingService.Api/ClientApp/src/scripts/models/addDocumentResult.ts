@@ -1,4 +1,4 @@
-import { InProcessDocumentState } from "./inProcessDocumentState";
+import { InProcessDocumentState } from ".";
 
 interface AddDocumentResult {
     id: string;

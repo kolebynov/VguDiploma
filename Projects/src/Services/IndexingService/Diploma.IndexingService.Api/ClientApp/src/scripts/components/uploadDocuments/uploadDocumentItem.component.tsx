@@ -1,37 +1,36 @@
 import React, { FunctionComponent, memo, ChangeEvent } from "react";
 import { Input } from "@material-ui/core";
+import { InProgressDocument, InProcessDocumentState } from "@app/models";
 
 interface UploadDocumentItemProps {
-    fileName: string;
-    state: UploadItemState;
+    inProgressDocument: InProgressDocument;
 };
 
-enum UploadItemState {
-    Idle,
-    Uploading,
-    Uploaded,
-    Error
-}
-
-const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(props => {
+const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(({ inProgressDocument }) => {
     let textState = "";
-    switch (props.state) {
-        case UploadItemState.Idle:
+    switch (inProgressDocument.state) {
+        case InProcessDocumentState.ReadyToUpload:
             textState = "Ready to upload";
             break;
-        case UploadItemState.Uploading:
+        case InProcessDocumentState.WaitingToUpload:
+            textState = "Waiting to upload";
+            break;
+        case InProcessDocumentState.Uploading:
             textState = "Uploading...";
             break;
-        case UploadItemState.Uploaded:
+        case InProcessDocumentState.Uploaded:
             textState = "Uploaded";
+            break;
+        case InProcessDocumentState.InQueue:
+            textState = "In queue";
             break;
     }
 
     return (
         <div style={{marginBottom: "10px"}}>
-            <div>{props.fileName} - {textState}</div>
+            <div>{inProgressDocument.document.fileName} - {textState}</div>
         </div>
     );
 });
 
-export { UploadDocumentItem, UploadItemState };
+export { UploadDocumentItem };
