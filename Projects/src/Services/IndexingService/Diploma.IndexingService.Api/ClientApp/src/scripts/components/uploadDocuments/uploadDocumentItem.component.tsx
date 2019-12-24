@@ -7,28 +7,11 @@ interface UploadDocumentItemProps {
 };
 
 const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(({ inProgressDocument }) => {
-    let textState = "";
-    switch (inProgressDocument.state) {
-        case InProcessDocumentState.ReadyToUpload:
-            textState = "Ready to upload";
-            break;
-        case InProcessDocumentState.WaitingToUpload:
-            textState = "Waiting to upload";
-            break;
-        case InProcessDocumentState.Uploading:
-            textState = "Uploading...";
-            break;
-        case InProcessDocumentState.Uploaded:
-            textState = "Uploaded";
-            break;
-        case InProcessDocumentState.InQueue:
-            textState = "In queue";
-            break;
-    }
+    const textState = InProcessDocumentState[inProgressDocument.state];
 
     return (
-        <div style={{marginBottom: "10px"}}>
-            <div>{inProgressDocument.document.fileName} - {textState}</div>
+        <div style={{ marginBottom: "10px" }}>
+            <div>{inProgressDocument.document.fileName} - {textState}: {inProgressDocument.errorInfo}</div>
         </div>
     );
 });

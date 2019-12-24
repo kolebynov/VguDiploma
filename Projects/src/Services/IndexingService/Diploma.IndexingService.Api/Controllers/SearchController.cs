@@ -24,9 +24,9 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search(string searchString) => 
+		public async Task<ApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search([FromQuery] SearchQuery searchQuery) => 
 			ApiResult.SuccessResultWithData(
-				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(new SearchQuery { SearchString = searchString }, CancellationToken.None))
+				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(searchQuery, CancellationToken.None))
 					.Select(DtoExtensions.ToDto)
 					.ToArray());
 	}

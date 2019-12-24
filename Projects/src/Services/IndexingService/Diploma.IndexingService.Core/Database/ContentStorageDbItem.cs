@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Diploma.IndexingService.Core.Internal.ContentStorage
+namespace Diploma.IndexingService.Core.Database
 {
 	internal class ContentStorageDbItem
 	{

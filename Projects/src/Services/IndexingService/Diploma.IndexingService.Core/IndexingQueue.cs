@@ -3,35 +3,27 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Diploma.IndexingService.Core.Configuration;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
-using Microsoft.Extensions.Options;
 
 namespace Diploma.IndexingService.Core
 {
 	internal class IndexingQueue : IIndexingQueue
 	{
 		private readonly Channel<DocumentInfo> channel;
+		private readonly IInProgressDocumentsStorage inProgressDocumentsStorage;
 
-		public IndexingQueue(IOptions<IndexingQueueOptions> options)
+		public IndexingQueue(IInProgressDocumentsStorage inProgressDocumentsStorage, Channel<DocumentInfo> channel)
 		{
-			if (options?.Value == null)
-			{
-				throw new ArgumentNullException(nameof(options));
-			}
-
-			channel = Channel.CreateBounded<DocumentInfo>(new BoundedChannelOptions(options.Value.QueueMaxSize > 0 ? options.Value.QueueMaxSize : 10)
-			{
-				FullMode = BoundedChannelFullMode.Wait,
-				AllowSynchronousContinuations = false,
-			});
+			this.inProgressDocumentsStorage = inProgressDocumentsStorage ?? throw new ArgumentNullException(nameof(inProgressDocumentsStorage));
+			this.channel = channel ?? throw new ArgumentNullException(nameof(channel));
 		}
 
 		public async Task Enqueue(IReadOnlyCollection<DocumentInfo> documents, CancellationToken cancellationToken)
 		{
 			foreach (var document in documents)
 			{
+				await inProgressDocumentsStorage.UpdateState(document, InProcessDocumentState.InQueue, cancellationToken);
 				await channel.Writer.WriteAsync(document, cancellationToken);
 			}
 		}

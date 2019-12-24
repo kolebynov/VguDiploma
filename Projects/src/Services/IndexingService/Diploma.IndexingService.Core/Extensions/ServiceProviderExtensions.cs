@@ -1,5 +1,5 @@
 ﻿using System;
-using Diploma.IndexingService.Core.Internal.ContentStorage;
+using Diploma.IndexingService.Core.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +15,7 @@ namespace Diploma.IndexingService.Core.Extensions
 			}
 
 			using var scope = serviceProvider.CreateScope();
-			scope.ServiceProvider.GetRequiredService<ContentStorageContext>().Database.Migrate();
+			scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
 
 			return serviceProvider;
 		}

@@ -10,18 +10,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Diploma.IndexingService.Core.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20191109141647_Initial")]
-    partial class Initial
+    [Migration("20191224213204_Add_ErrorInfo")]
+    partial class Add_ErrorInfo
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.0.0")
+                .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Diploma.IndexingService.Core.Internal.ContentStorage.ContentStorageDbItem", b =>
+            modelBuilder.Entity("Diploma.IndexingService.Core.Database.ContentStorageDbItem", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -38,6 +38,25 @@ namespace Diploma.IndexingService.Core.Migrations
                     b.HasKey("Id", "Category");
 
                     b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("Diploma.IndexingService.Core.Objects.InProgressDocument", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ErrorInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("State")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InProgressDocuments");
                 });
 #pragma warning restore 612, 618
         }

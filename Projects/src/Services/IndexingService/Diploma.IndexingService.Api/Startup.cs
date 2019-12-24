@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using System.Security.Claims;
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Api.Internal;
@@ -32,6 +34,7 @@ namespace Diploma.IndexingService.Api
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IIndexingQueue).Assembly);
+			services.AddSignalR();
 
 			services.AddMvcCore(opt => opt.EnableEndpointRouting = false)
 				.AddCors()
@@ -66,9 +69,24 @@ namespace Diploma.IndexingService.Api
 		{
 			if (env.EnvironmentName == "Development")
 			{
-				app.UseCors(builder => builder.AllowAnyOrigin());
+				app.UseCors(builder => builder.WithOrigins("http://127.0.0.1:7778").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 				app.UseDeveloperExceptionPage();
+				app.Use((context, next) =>
+				{
+					context.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+					{
+						new Claim(ClaimTypes.NameIdentifier, "123"),
+						new Claim(ClaimTypes.Name, "Test user"),
+						new Claim(ClaimTypes.Email, "test@example.com"),
+						new Claim(ClaimTypes.Role, "Admin")
+					}));
+
+					return next();
+				});
 			}
+
+			app.UseRouting();
+			app.UseEndpoints(endPoints => endPoints.MapHub<SignalrHub>("/signalr"));
 
 			app.UseMvc();
 		}

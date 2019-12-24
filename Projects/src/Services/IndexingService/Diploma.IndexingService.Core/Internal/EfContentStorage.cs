@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Configuration;
+using Diploma.IndexingService.Core.Database;
 using Diploma.IndexingService.Core.Exceptions;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
@@ -13,14 +14,14 @@ using Diploma.Shared.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Diploma.IndexingService.Core.Internal.ContentStorage
+namespace Diploma.IndexingService.Core.Internal
 {
 	internal class EfContentStorage : IContentStorage
 	{
-		private readonly ContentStorageContext context;
+		private readonly DatabaseContext context;
 		private readonly ContentStorageOptions options;
 
-		public EfContentStorage(ContentStorageContext context, IOptions<ContentStorageOptions> options)
+		public EfContentStorage(DatabaseContext context, IOptions<ContentStorageOptions> options)
 		{
 			this.context = context ?? throw new ArgumentNullException(nameof(context));
 			this.options = options?.Value ?? throw new ArgumentNullException(nameof(options));

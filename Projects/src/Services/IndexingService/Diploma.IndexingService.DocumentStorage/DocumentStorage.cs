@@ -59,6 +59,11 @@ namespace Diploma.IndexingService.EsDocumentStorage
 		public async Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery,
 			CancellationToken cancellationToken)
 		{
+			if (searchQuery == null)
+			{
+				throw new ArgumentNullException(nameof(searchQuery));
+			}
+
 			var response = await elasticClient.SearchAsync<DocumentInfoModel>(
 				sd => sd
 					.Index(options.IndexName)
@@ -68,7 +73,9 @@ namespace Diploma.IndexingService.EsDocumentStorage
 							.Query(searchQuery.SearchString)))
 					.Highlight(hs => hs
 						.Fields(hfd => hfd.Field("text"), hfd => hfd.Field("fileName")))
-					.Source(sfd => sfd.Includes(fd => fd.Field("fileName"))),
+					.Source(sfd => sfd.Includes(fd => fd.Field("fileName")))
+					.Skip(searchQuery.Skip)
+					.Take(searchQuery.Limit),
 				cancellationToken);
 
 			return response.Hits.Select(hit => new FoundDocument

@@ -7,12 +7,14 @@ enum InProcessDocumentState {
     Uploaded,
     InQueue,
     Processing,
-    Done
+    Done,
+    Error
 };
 
 interface InProgressDocument {
     document: GetDocument;
     state: InProcessDocumentState;
+    errorInfo?: string;
 }
 
 export { InProgressDocument, InProcessDocumentState };

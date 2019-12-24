@@ -4,6 +4,7 @@
 	{
 		InQueue = 4,
 		Processing = 5,
-		Done = 6
+		Done = 6,
+		Error = 7
 	}
 }

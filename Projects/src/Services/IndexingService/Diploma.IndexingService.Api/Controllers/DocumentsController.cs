@@ -43,10 +43,10 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments()
+		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments([FromQuery] GetDocumentsQuery query)
 		{
 			var documents =
-				await documentStorage.GetDocuments(await userService.GetCurrentUser(), 100, 0, CancellationToken.None);
+				await documentStorage.GetDocuments(await userService.GetCurrentUser(), query.Limit, query.Skip, CancellationToken.None);
 
 			return ApiResult.SuccessResultWithData((IReadOnlyCollection<GetDocumentDto>)documents.Select(x => new GetDocumentDto
 			{
@@ -100,6 +100,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpPost("upload")]
+		[RequestSizeLimit(104857600)]
 		public async Task<ApiResult<IEnumerable<string>>> Upload(IFormFileCollection files)
 		{
 			var tokens = new List<string>();

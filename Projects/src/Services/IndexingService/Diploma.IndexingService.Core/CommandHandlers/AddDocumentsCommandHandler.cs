@@ -21,6 +21,7 @@ namespace Diploma.IndexingService.Core.CommandHandlers
 		public async Task<AddDocumentsResult> Handle(AddDocumentsCommand request, CancellationToken cancellationToken)
 		{
 			await indexingQueue.Enqueue(request.Documents, cancellationToken);
+
 			
 			return new AddDocumentsResult(request.Documents.ToDictionary(x => x.Id, x => InProcessDocumentState.InQueue));
 		}

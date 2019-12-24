@@ -5,6 +5,9 @@ import { history } from '@app/utilities';
 import { Link, LinkProps } from 'react-router-dom';
 import { AppBar, Toolbar, Button, makeStyles, createStyles, Theme } from '@material-ui/core';
 import { resources } from '@app/utilities/resources';
+import { signalrService } from '@app/services';
+
+signalrService.start();
 
 const useStyles = makeStyles((theme: Theme) => 
   createStyles({
