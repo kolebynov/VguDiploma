@@ -15,7 +15,9 @@ const Search: FunctionComponent = memo(() => {
     });
     const [isSearching, setSearching] = useState(false);
 
-    const onSearchButtonClick = () => {
+    const onSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        
         if (state.searchString) {
             setSearching(true);
             documentService.search(state.searchString)
@@ -38,10 +40,10 @@ const Search: FunctionComponent = memo(() => {
 
     return (
         <div>
-            <div style={{marginBottom: "5px"}}>
+            <form style={{marginBottom: "5px"}} noValidate onSubmit={onSubmit}>
                 <TextField label={resourceSet.getLocalizableValue("search_title")} value={state.searchString} onChange={onSearchTextFieldChange} />
-                <Button variant="contained" onClick={onSearchButtonClick}>{resourceSet.getLocalizableValue("search_button_text")}</Button>
-            </div>
+                <Button variant="contained" type="submit">{resourceSet.getLocalizableValue("search_button_text")}</Button>
+            </form>
             <div>
                 {isSearching ? <Loader /> : <SearchResultList foundDocuments={state.searchResult} />}
             </div>
