@@ -26,7 +26,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\Infrastructure\Diploma.Api.Shared\Diploma.Api.Shared.csproj" />
     <ProjectReference Include="..\Diploma.IndexingService.Core\Diploma.IndexingService.Core.csproj" />
-    <ProjectReference Include="..\Diploma.IndexingService.DocumentStorage\Diploma.IndexingService.EsDocumentStorage.csproj" />
+    <ProjectReference Include="..\Diploma.IndexingService.EsDocumentStorage\Diploma.IndexingService.EsDocumentStorage.csproj" />
   </ItemGroup>
 
   <ItemGroup>

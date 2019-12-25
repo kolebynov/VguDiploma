@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
 WORKDIR /src
-COPY src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj /src/src/Services/IndexingService/Diploma.IndexingService.Api
+COPY src/Infrastructure/Diploma.Api.Shared/Diploma.Api.Shared.csproj src/Infrastructure/Diploma.Api.Shared/
+COPY src/Infrastructure/Diploma.Shared/Diploma.Shared.csproj src/Infrastructure/Diploma.Shared/
+COPY src/Services/IndexingService/Diploma.IndexingService.Core/Diploma.IndexingService.Core.csproj src/Services/IndexingService/Diploma.IndexingService.Core/
+COPY src/Services/IndexingService/Diploma.IndexingService.EsDocumentStorage/Diploma.IndexingService.EsDocumentStorage.csproj src/Services/IndexingService/Diploma.IndexingService.EsDocumentStorage/
+COPY src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj src/Services/IndexingService/Diploma.IndexingService.Api/
 RUN dotnet restore "src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj"
 COPY . .
 WORKDIR "/src/src/Services/IndexingService/Diploma.IndexingService.Api"
