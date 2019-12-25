@@ -6,6 +6,8 @@ module.exports = function (env, props) {
 	const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 	const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
+	const webpack = require('webpack');
+
 	const path = require('path');
 	const dist = path.resolve(__dirname, props.clientAppPath || 'wwwroot');
 
