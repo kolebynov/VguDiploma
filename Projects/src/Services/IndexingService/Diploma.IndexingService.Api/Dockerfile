@@ -1,7 +1,7 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
 WORKDIR /src
-COPY /src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj ./src/Services/IndexingService/Diploma.IndexingService.Api
-RUN dotnet restore "./src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj"
+COPY src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj /src/src/Services/IndexingService/Diploma.IndexingService.Api
+RUN dotnet restore "src/Services/IndexingService/Diploma.IndexingService.Api/Diploma.IndexingService.Api.csproj"
 COPY . .
 WORKDIR "/src/src/Services/IndexingService/Diploma.IndexingService.Api"
 RUN dotnet publish "Diploma.IndexingService.Api.csproj" -c Release -o /app/publish --no-restore
