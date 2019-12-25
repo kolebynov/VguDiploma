@@ -12,7 +12,7 @@ RUN dotnet publish "Diploma.IndexingService.Api.csproj" -c Release -o /app/publi
 
 FROM node:13.5.0-alpine as client_build
 WORKDIR /ClientApp
-COPY /src/Services/IndexingService/Diploma.IndexingService.Api/ClientApp/package.json .
+COPY /src/Services/IndexingService/Diploma.IndexingService.Api/ClientApp/package.json /src/Services/IndexingService/Diploma.IndexingService.Api/ClientApp/package-lock.json .
 RUN npm install
 COPY /src/Services/IndexingService/Diploma.IndexingService.Api/ClientApp/ .
 RUN npm run release
