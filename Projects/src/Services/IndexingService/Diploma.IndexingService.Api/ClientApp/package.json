@@ -44,8 +44,8 @@
     "webpack-dev-server": "3.9.0"
   },
   "scripts": {
-    "release": "webpack --mode production --progress",
-    "serve": "webpack-dev-server -d --mode development",
+    "release": "webpack --mode production --progress --env.SIGNALR_URL=/signalr",
+    "serve": "webpack-dev-server -d --mode development --env.SIGNALR_URL=http://localhost:5000/signalr",
     "lint": "tslint -p ./tsconfig.json"
   },
   "engines": {

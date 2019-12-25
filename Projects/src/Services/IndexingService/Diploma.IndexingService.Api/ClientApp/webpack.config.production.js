@@ -1,4 +1,4 @@
-module.exports = function (props) {
+module.exports = function (env, props) {
 	const HtmlWebpackPlugin = require('html-webpack-plugin');
 	const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 	const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -15,6 +15,11 @@ module.exports = function (props) {
 	const outputChunksFormat = '[name][chunkhash].js';
 	const outputScriptsFormat = '[chunkhash].js';
 	const outputStylesFormat = '[chunkhash].css';
+
+	const envKeys = Object.keys(env).reduce((prev, next) => {
+		prev[`process.env.${next}`] = JSON.stringify(env[next]);
+		return prev;
+	  }, {});
 
 	return {
 		entry: {
@@ -45,6 +50,7 @@ module.exports = function (props) {
 		},
 
 		plugins: [
+			new webpack.DefinePlugin(envKeys),
 			new CleanWebpackPlugin(),
 			new TerserPlugin({
 				parallel: true,

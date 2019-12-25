@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = function (env, props) {
 	const HtmlWebpackPlugin = require('html-webpack-plugin');
 	const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 	const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
@@ -10,6 +10,11 @@ module.exports = function () {
 
 	const outputChunksFormat = '[chunkhash].js';
 	const outputStylesFormat = './styles.css';
+
+	const envKeys = Object.keys(env).reduce((prev, next) => {
+		prev[`process.env.${next}`] = JSON.stringify(env[next]);
+		return prev;
+	  }, {});
 
 	return {
 		entry: {
@@ -59,6 +64,7 @@ module.exports = function () {
 		},
 
 		plugins: [
+			new webpack.DefinePlugin(envKeys),
 			new HtmlWebpackPlugin({
 				template: indexTemplate
 			}),
