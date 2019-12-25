@@ -21,5 +21,5 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS final
 WORKDIR /app
 EXPOSE 80
 COPY --from=build /app/publish .
-COPY --from=client_build /ClientApp/wwwroot ./wwwroot
+COPY --from=client_build /ClientApp/wwwroot ./wwwroot/
 ENTRYPOINT ["dotnet", "Diploma.IndexingService.Api.dll"]
