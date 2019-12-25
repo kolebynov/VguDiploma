@@ -1,6 +1,6 @@
 ﻿namespace Diploma.IndexingService.Api.Dto
 {
-	public class GetDocumentsQuery
+	public class GetQuery
 	{
 		public int Limit { get; set; } = 10;
 

@@ -24,12 +24,7 @@ namespace Diploma.IndexingService.Api.Internal
 			return hubContext.Clients.User(inProgressDocument.Id.UserIdentity)
 				.SendAsync(
 					"inProgressDocumentStateChanged",
-					new InProgressDocumentDto
-					{
-						Document = new GetDocumentDto { Id = inProgressDocument.Id.GetClientId(), FileName = inProgressDocument.FileName },
-						State = inProgressDocument.State,
-						ErrorInfo = inProgressDocument.ErrorInfo
-					},
+					inProgressDocument.ToDto(),
 					cancellationToken);
 		}
 	}

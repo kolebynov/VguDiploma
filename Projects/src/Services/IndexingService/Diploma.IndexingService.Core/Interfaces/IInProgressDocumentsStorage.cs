@@ -11,6 +11,11 @@ namespace Diploma.IndexingService.Core.Interfaces
 
 		Task SetErrorState(DocumentInfo document, string errorInfo, CancellationToken cancellationToken);
 
-		Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(int limit, int skip, CancellationToken cancellationToken);
+		Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(string userIdentity, int limit, int skip,
+			CancellationToken cancellationToken);
+
+		Task RemoveInProgressDocuments(
+			IReadOnlyCollection<DocumentIdentity> documentIds,
+			CancellationToken cancellationToken);
 	}
 }

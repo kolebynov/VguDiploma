@@ -38,6 +38,21 @@ namespace Diploma.IndexingService.Api.Extensions
 			};
 		}
 
+		public static InProgressDocumentDto ToDto(this InProgressDocument inProgressDocument)
+		{
+			if (inProgressDocument == null)
+			{
+				throw new ArgumentNullException(nameof(inProgressDocument));
+			}
+
+			return new InProgressDocumentDto
+			{
+				Document = new GetDocumentDto { Id = inProgressDocument.Id.GetClientId(), FileName = inProgressDocument.FileName },
+				State = inProgressDocument.State,
+				ErrorInfo = inProgressDocument.ErrorInfo
+			};
+		}
+
 		public static string GetClientId(this DocumentIdentity documentIdentity)
 		{
 			if (documentIdentity == null)

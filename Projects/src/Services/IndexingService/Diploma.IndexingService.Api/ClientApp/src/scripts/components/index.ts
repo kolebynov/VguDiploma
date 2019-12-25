@@ -8,3 +8,5 @@ export * from './uploadDocuments/uploadDocumentItem.component';
 export * from './documentList/documentList.component';
 export * from './documentInfo/documentInfo.component';
 export * from './loader/loader.component';
+export * from './inProgressDocumentList/inProgressDocumentList.component';
+export * from './inProgressDocumentList/inProgressDocumentListItem.component';

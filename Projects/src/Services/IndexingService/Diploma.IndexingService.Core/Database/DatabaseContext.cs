@@ -1,5 +1,4 @@
-﻿using Diploma.IndexingService.Core.Objects;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Diploma.IndexingService.Core.Database
 {
@@ -7,7 +6,7 @@ namespace Diploma.IndexingService.Core.Database
 	{
 		public DbSet<ContentStorageDbItem> Items { get; set; }
 
-		public DbSet<InProgressDocument> InProgressDocuments { get; set; }
+		public DbSet<InProgressDocumentDbItem> InProgressDocuments { get; set; }
 
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
 		{
@@ -23,16 +22,8 @@ namespace Diploma.IndexingService.Core.Database
 					x.Id, x.Category
 				});
 
-			var inProgressDocumentBuilder = modelBuilder.Entity<InProgressDocument>();
-			inProgressDocumentBuilder
-				.Property(x => x.Id)
-				.HasConversion(
-					id => id.ToString(),
-					idStr => DocumentIdentity.FromString(idStr));
-			inProgressDocumentBuilder.HasKey(x => x.Id);
-			inProgressDocumentBuilder.Property(x => x.FileName);
-			inProgressDocumentBuilder.Property(x => x.State);
-			inProgressDocumentBuilder.Property(x => x.ErrorInfo);
+			var inProgressDocumentBuilder = modelBuilder.Entity<InProgressDocumentDbItem>();
+			inProgressDocumentBuilder.HasKey(x => new { x.Id, x.UserIdentity });
 		}
 	}
 }

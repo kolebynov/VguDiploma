@@ -43,7 +43,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments([FromQuery] GetDocumentsQuery query)
+		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments([FromQuery] GetQuery query)
 		{
 			var documents =
 				await documentStorage.GetDocuments(await userService.GetCurrentUser(), query.Limit, query.Skip, CancellationToken.None);

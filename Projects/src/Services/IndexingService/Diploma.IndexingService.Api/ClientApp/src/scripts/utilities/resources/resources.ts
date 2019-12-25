@@ -39,5 +39,17 @@ export default new Resources({
     }),
     locale: new ResourceSet({
         "locale": "en"
+    }),
+    inProgressDocumentState: new ResourceSet({
+        "WaitingToUpload": "Waiting to upload",
+        "Uploading": "Uploading",
+        "Uploaded": "Uploaded",
+        "InQueue": "In processing queue",
+        "Processing": "Processing",
+        "Done": "Processing done",
+        "Error": "Error"
+    }),
+    inProgressDocumentList: new ResourceSet({
+        "no_documents": "List of in-progress documents is empty"
     })
 });

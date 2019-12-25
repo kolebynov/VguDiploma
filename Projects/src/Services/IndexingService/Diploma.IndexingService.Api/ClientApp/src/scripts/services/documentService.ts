@@ -2,35 +2,48 @@ import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, 
 import axios from "axios";
 import { inProgressDocumentService } from "./inProgressDocumentService";
 
+export interface AddDocumentModel {
+    document: GetDocument;
+    file: File;
+}
+
 class DocumentService {
-    public addDocument(document: GetDocument, file: File): Promise<AddDocumentResult> {
+    public async addDocuments(documents: AddDocumentModel[]): Promise<AddDocumentResult[]> {
+        documents.forEach(({ document }) =>
+            inProgressDocumentService.updateState(document, InProcessDocumentState.WaitingToUpload));
+
+        const results: AddDocumentResult[] = [];
+        for (const document of documents) {
+            results.push(await this.addDocument(document));
+        }
+
+        return results;
+    }
+
+    private async addDocument({ file, document }: AddDocumentModel): Promise<AddDocumentResult> {
         const formData = new FormData();
         formData.append("files", file);
 
         inProgressDocumentService.updateState(document, InProcessDocumentState.Uploading);
 
-        return axios
+        const { data: { data: [contentToken] } } = await axios
             .post<ApiResult<string[]>>("/api/documents/upload", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
-            })
-            .then(({ data: { data: [contentToken] } }) => {
-                inProgressDocumentService.updateState(document, InProcessDocumentState.Uploaded);
-
-                const addDocument: AddDocument = {
-                    id: document.id,
-                    fileName: file.name,
-                    modificationDate: new Date(file.lastModified),
-                    contentToken: contentToken
-                };
-                return axios.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, [addDocument]);
-            })
-            .then(response => {
-                const result = response.data.data[0];
-                inProgressDocumentService.updateState(document, result.state);
-                return result;
             });
+
+        inProgressDocumentService.updateState(document, InProcessDocumentState.Uploaded);
+
+        const addDocument: AddDocument = {
+            id: document.id,
+            fileName: file.name,
+            modificationDate: document.modificationDate,
+            contentToken: contentToken
+        };
+        const { data: { data: [result] } } = await axios.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, [addDocument]);
+        inProgressDocumentService.updateState(document, result.state);
+        return result;
     }
 
     public getDocuments(): Promise<GetDocument[]> {

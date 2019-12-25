@@ -2,9 +2,9 @@
 {
 	public enum InProcessDocumentState
 	{
-		InQueue = 4,
-		Processing = 5,
-		Done = 6,
-		Error = 7
+		InQueue = 3,
+		Processing = 4,
+		Done = 5,
+		Error = 6
 	}
 }

@@ -7,7 +7,7 @@ interface GetDocument {
 interface AddDocument {
     id: string;
     fileName: string;
-    modificationDate: Date;
+    modificationDate: string;
     contentToken: string;
 }
 

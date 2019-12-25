@@ -24,6 +24,14 @@ namespace Diploma.IndexingService.Core.Objects
 			UserIdentity = userIdentity;
 		}
 
+		public void Deconstruct(out string id, out string userIdentity)
+		{
+			id = Id;
+			userIdentity = UserIdentity;
+		}
+
+		public override string ToString() => $"{Id}_{UserIdentity}";
+
 		public static DocumentIdentity FromString(string stringId)
 		{
 			var lastIndex = stringId.LastIndexOf('_');
@@ -34,7 +42,5 @@ namespace Diploma.IndexingService.Core.Objects
 
 			return new DocumentIdentity(stringId.Substring(0, lastIndex), stringId.Substring(lastIndex + 1));
 		}
-
-		public override string ToString() => $"{Id}_{UserIdentity}";
 	}
 }

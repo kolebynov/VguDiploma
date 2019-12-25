@@ -7,7 +7,7 @@ module.exports = function (props) {
 	const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 	const path = require('path');
-	const dist = path.resolve(__dirname, props.clientAppPath || 'client');
+	const dist = path.resolve(__dirname, props.clientAppPath || 'wwwroot');
 
 	const inputScriptsFile = './src/index.tsx';
 	const indexTemplate = './src/index.html';

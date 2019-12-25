@@ -1,17 +1,13 @@
-import React, { FunctionComponent, memo, ChangeEvent } from "react";
-import { Input } from "@material-ui/core";
-import { InProgressDocument, InProcessDocumentState } from "@app/models";
+import React, { FunctionComponent, memo } from "react";
 
 interface UploadDocumentItemProps {
-    inProgressDocument: InProgressDocument;
+    file: File;
 };
 
-const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(({ inProgressDocument }) => {
-    const textState = InProcessDocumentState[inProgressDocument.state];
-
+const UploadDocumentItem: FunctionComponent<UploadDocumentItemProps> = memo(({ file }) => {
     return (
         <div style={{ marginBottom: "10px" }}>
-            <div>{inProgressDocument.document.fileName} - {textState}: {inProgressDocument.errorInfo}</div>
+            <div>{file.name}</div>
         </div>
     );
 });

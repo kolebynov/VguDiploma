@@ -85,10 +85,16 @@ namespace Diploma.IndexingService.Api
 				});
 			}
 
-			app.UseRouting();
-			app.UseEndpoints(endPoints => endPoints.MapHub<SignalrHub>("/signalr"));
+			app.UseStaticFiles();
 
 			app.UseMvc();
+
+			app.UseRouting();
+			app.UseEndpoints(endPoints =>
+			{
+				endPoints.MapHub<SignalrHub>("/signalr");
+				endPoints.MapFallbackToFile("index.html");
+			});
 		}
 	}
 }

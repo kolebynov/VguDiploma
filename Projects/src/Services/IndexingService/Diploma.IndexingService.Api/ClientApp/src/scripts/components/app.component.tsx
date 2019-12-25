@@ -1,11 +1,12 @@
-import React, { FunctionComponent, memo, Suspense } from 'react';
+import React, { FunctionComponent, memo, Suspense, useState } from 'react';
 import { Router, Switch, Route, Redirect } from 'react-router';
 import { SearchPage, MyDocumentsPage } from '@app/pages';
 import { history } from '@app/utilities';
 import { Link, LinkProps } from 'react-router-dom';
-import { AppBar, Toolbar, Button, makeStyles, createStyles, Theme } from '@material-ui/core';
+import { AppBar, Toolbar, Button, makeStyles, createStyles, Theme, Drawer } from '@material-ui/core';
 import { resources } from '@app/utilities/resources';
 import { signalrService } from '@app/services';
+import { InProgressDocumentList } from '.';
 
 signalrService.start();
 
@@ -20,6 +21,7 @@ const resourceSet = resources.getResourceSet("app");
 
 const App: FunctionComponent = memo(() => {
   const classes = useStyles({});
+  const [showInProgress, setShowInProgress] = useState(false);
 
   const searchLink = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
     (props, ref) => <Link innerRef={ref} to="/" {...props} />,
@@ -39,9 +41,16 @@ const App: FunctionComponent = memo(() => {
           <Button color="inherit" component={myDocumentsLink}>
             {resourceSet.getLocalizableValue("my_documents_link")}
           </Button>
+          <Button color="inherit" onClick={() => setShowInProgress(true)}>
+            Show in-progress documents
+          </Button>
         </Toolbar>
       </AppBar>
     </div>
+
+    <Drawer open={showInProgress} anchor="right" onClose={() => setShowInProgress(false)}>
+      <InProgressDocumentList />
+    </Drawer>
 
     <Suspense fallback={null}>
       <Switch>

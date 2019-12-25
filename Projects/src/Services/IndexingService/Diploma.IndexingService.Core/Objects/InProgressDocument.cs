@@ -12,7 +12,10 @@ namespace Diploma.IndexingService.Core.Objects
 
 		public string ErrorInfo { get; }
 
-		public InProgressDocument(DocumentIdentity id, string fileName, InProcessDocumentState state, string errorInfo = null)
+		public DateTimeOffset LastStatusUpdateTime { get; }
+
+		public InProgressDocument(DocumentIdentity id, string fileName, InProcessDocumentState state,
+			DateTimeOffset lastStatusUpdateTime, string errorInfo = null)
 		{
 			if (string.IsNullOrEmpty(errorInfo) && state == InProcessDocumentState.Error)
 			{
@@ -23,6 +26,7 @@ namespace Diploma.IndexingService.Core.Objects
 			FileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
 			State = state;
 			ErrorInfo = errorInfo;
+			LastStatusUpdateTime = lastStatusUpdateTime;
 		}
 	}
 }

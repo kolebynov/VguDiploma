@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Database;
@@ -32,50 +33,70 @@ namespace Diploma.IndexingService.Core.Internal
 			return UpdateStateInternal(document, InProcessDocumentState.Error, errorInfo, cancellationToken);
 		}
 
-		public Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(int limit, int skip, CancellationToken cancellationToken)
+		public async Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(string userIdentity, int limit, int skip,
+			CancellationToken cancellationToken) =>
+			await context.InProgressDocuments.Where(x => x.UserIdentity == userIdentity)
+				.Skip(skip)
+				.Take(limit)
+				.Select(x => new InProgressDocument(new DocumentIdentity(x.Id, userIdentity), x.FileName, x.State,
+					x.LastStatusUpdateTime, x.ErrorInfo))
+				.ToArrayAsync(cancellationToken);
+
+		public async Task RemoveInProgressDocuments(IReadOnlyCollection<DocumentIdentity> documentIds, CancellationToken cancellationToken)
 		{
-			throw new NotImplementedException();
+			foreach (var documentId in documentIds)
+			{
+				var document = await context.InProgressDocuments.FindAsync(
+					new object[] { documentId.Id, documentId.UserIdentity }, cancellationToken);
+				if (document != null)
+				{
+					context.InProgressDocuments.Remove(document);
+				}
+			}
+
+			await context.SaveChangesAsync(cancellationToken);
 		}
 
 		private async Task UpdateStateInternal(DocumentInfo document, InProcessDocumentState newState, string errorInfo,
 			CancellationToken cancellationToken)
 		{
-			InProgressDocument inProgressDocument = null;
+			InProgressDocumentDbItem inProgressDocument = null;
 			await ResilientTransaction.New(context).ExecuteAsync(async () =>
 			{
+				var (id, userIdentity) = document.Id;
 				inProgressDocument =
-					await context.InProgressDocuments.FindAsync(new object[] { document.Id }, cancellationToken);
+					await context.InProgressDocuments.FindAsync(new object[] { id, userIdentity }, cancellationToken);
 				if (inProgressDocument != null)
 				{
-					if (newState == InProcessDocumentState.Done)
-					{
-						context.InProgressDocuments.Remove(inProgressDocument);
-						inProgressDocument = new InProgressDocument(inProgressDocument.Id, inProgressDocument.FileName, InProcessDocumentState.Done);
-					}
-					else if (inProgressDocument.State < newState)
-					{
-						context.InProgressDocuments.Attach(inProgressDocument).State = EntityState.Detached;
-						inProgressDocument = new InProgressDocument(inProgressDocument.Id,
-							inProgressDocument.FileName, newState, errorInfo);
-						context.InProgressDocuments.Update(inProgressDocument);
-					}
-					else if (inProgressDocument.State > newState)
-					{
-						inProgressDocument = null;
-					}
+					context.InProgressDocuments.Update(inProgressDocument);
 				}
-				else if (newState != InProcessDocumentState.Done)
+				else
 				{
-					inProgressDocument = new InProgressDocument(document.Id, document.FileName, newState, errorInfo);
+					inProgressDocument = new InProgressDocumentDbItem
+					{
+						Id = id,
+						UserIdentity = userIdentity,
+					};
 					context.InProgressDocuments.Add(inProgressDocument);
 				}
+
+				inProgressDocument.ErrorInfo = errorInfo;
+				inProgressDocument.FileName = document.FileName;
+				inProgressDocument.State = newState;
+				inProgressDocument.LastStatusUpdateTime = DateTimeOffset.UtcNow;
 
 				await context.SaveChangesAsync(cancellationToken);
 			});
 
-			if (inProgressDocument != null)
+			if (inProgressDocument.State == newState)
 			{
-				await mediator.Publish(new InProgressDocumentStateChanged(inProgressDocument), cancellationToken);
+				await mediator.Publish(
+					new InProgressDocumentStateChanged(
+						new InProgressDocument(
+							document.Id,
+							inProgressDocument.FileName, inProgressDocument.State,
+							inProgressDocument.LastStatusUpdateTime, inProgressDocument.ErrorInfo)),
+					cancellationToken);
 			}
 		}
 	}

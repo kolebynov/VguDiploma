@@ -1,10 +1,9 @@
-import React, { FunctionComponent, memo, useState, ChangeEvent, useEffect } from "react";
+import React, { FunctionComponent, memo, useState, ChangeEvent } from "react";
 import { resources } from "@app/utilities/resources";
-import { Button, Fab, Input, makeStyles, createStyles } from "@material-ui/core";
+import { Button, makeStyles, createStyles } from "@material-ui/core";
 import { UploadDocumentItem } from "./uploadDocumentItem.component";
-import { documentService } from "@app/services";
-import { InProgressDocument, InProcessDocumentState } from "@app/models";
-import { inProgressDocumentService } from "@app/services/inProgressDocumentService";
+import { AddDocumentModel, documentService } from "@app/services";
+import { getIdForDocument, getModificationDateForDocument } from "@app/utilities";
 
 const resourceSet = resources.getResourceSet("uploadDocuments");
 const useStyles = makeStyles(theme => createStyles({
@@ -14,65 +13,41 @@ const useStyles = makeStyles(theme => createStyles({
 }));
 
 const UploadDocuments: FunctionComponent = memo(() => {
-    const [filesToUpload, setFilesToUpload] = useState(new Array<{ id: string; file: File; }>());
-    const [inProgressDocuments, setInProgressDocuments] = useState(new Array<InProgressDocument>());
+    const [filesToUpload, setFilesToUpload] = useState(new Array<AddDocumentModel>());
     const classes = useStyles({});
 
-    useEffect(() => {
-        const sub = inProgressDocumentService.inProgressDocuments.subscribe(next => {
-            setInProgressDocuments(next);
-        });
-
-        return () => sub.unsubscribe();
-    }, []);
-
     const uploadFiles = () => {
-        filesToUpload.forEach(({ id }) => 
-            inProgressDocumentService.updateState(inProgressDocuments.find(x => x.document.id === id).document, InProcessDocumentState.WaitingToUpload));
-
-        uploadFile(0);
+        documentService.addDocuments(filesToUpload);
+        setFilesToUpload([]);
     };
 
-    const uploadFile = (index: number): void => {
-        const fileToUpload = filesToUpload[index];
-        if (!fileToUpload) {
-            setFilesToUpload([]);
-            return;
-        }
-
-        const { file, id } = fileToUpload;
-
-        documentService.addDocument(inProgressDocuments.find(x => x.document.id === id).document, file)
-            .then(() => {
-                uploadFile(index + 1);
-            });
-    };
+    function removeFile(id: string) {
+        setFilesToUpload(filesToUpload.filter(x => x.document.id !== id));
+    }
 
     const onFilesSelected = ({ target }: ChangeEvent) => {
         const inputTarget = (target as HTMLInputElement);
         const [...files] = inputTarget.files;
-        const newFilesToUpload = files
+
+        const addFiles = files
+            .filter(file => !filesToUpload.some(x => x.file.name === file.name))
             .map(file => ({
-                id: `${file.name}_${file.size}`,
+                document: {
+                    id: getIdForDocument(file),
+                    fileName: file.name,
+                    modificationDate: getModificationDateForDocument(file)
+                },
                 file
-            }))
-            .filter(file => !inProgressDocuments.some(x => x.document.id === file.id));
-        setFilesToUpload(filesToUpload.concat(newFilesToUpload));
-        newFilesToUpload.forEach(file => {
-            inProgressDocumentService.updateState({
-                id: file.id,
-                fileName: file.file.name,
-                modificationDate: new Date(file.file.lastModified).toISOString()
-            }, InProcessDocumentState.ReadyToUpload);
-        });
+            }));
+        setFilesToUpload(filesToUpload.concat(addFiles));
 
         inputTarget.value = null;
     }
 
     return (
         <div>
-            {inProgressDocuments.map((inProgressDocument, index) => (
-                <UploadDocumentItem key={index} inProgressDocument={inProgressDocument} />
+            {filesToUpload.map(({ file }) => (
+                <UploadDocumentItem key={file.name} file={file} />
             ))}
             <input type="file" className={classes.selectFiles} multiple onChange={onFilesSelected} />
             <Button variant="contained" onClick={uploadFiles}>{resourceSet.getLocalizableValue("upload_button_title")}</Button>
