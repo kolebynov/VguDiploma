@@ -12,13 +12,13 @@ const useStyles = makeStyles(theme => createStyles({
     }
 }));
 
-const UploadDocuments: FunctionComponent = memo(() => {
+export const UploadDocuments: FunctionComponent = memo(() => {
     const [filesToUpload, setFilesToUpload] = useState(new Array<AddDocumentModel>());
     const classes = useStyles({});
 
-    const uploadFiles = () => {
-        documentService.addDocuments(filesToUpload);
-        setFilesToUpload([]);
+    const uploadFiles = async () => {
+        documentService.addDocuments(filesToUpload, res =>
+            setFilesToUpload(prev => prev.filter(x => x.document.id !== res.id)));
     };
 
     function removeFile(id: string) {
@@ -54,5 +54,3 @@ const UploadDocuments: FunctionComponent = memo(() => {
         </div>
     );
 });
-
-export { UploadDocuments };

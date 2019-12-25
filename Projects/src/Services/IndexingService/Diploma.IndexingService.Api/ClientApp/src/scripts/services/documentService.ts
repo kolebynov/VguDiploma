@@ -8,13 +8,18 @@ export interface AddDocumentModel {
 }
 
 class DocumentService {
-    public async addDocuments(documents: AddDocumentModel[]): Promise<AddDocumentResult[]> {
+    public async addDocuments(documents: AddDocumentModel[], callback: (res: AddDocumentResult) => void = null)
+        : Promise<AddDocumentResult[]> {
         documents.forEach(({ document }) =>
             inProgressDocumentService.updateState(document, InProcessDocumentState.WaitingToUpload));
 
         const results: AddDocumentResult[] = [];
         for (const document of documents) {
-            results.push(await this.addDocument(document));
+            const result = await this.addDocument(document);
+            if (callback) {
+                callback(result);
+            }
+            results.push(result);
         }
 
         return results;
