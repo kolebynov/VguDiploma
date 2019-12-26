@@ -30,7 +30,7 @@ namespace Diploma.IndexingService.Core.Extensions
 						.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)
 						.EnableRetryOnFailure(10)));
 
-			services.AddSingleton<IDocumentTextExtractor, ToxyDocumentTextExtractor>();
+			services.AddSingleton<IDocumentTextExtractor, DocumentTextExtractor>();
 			services.AddSingleton(sp =>
 			{
 				var options = sp.GetRequiredService<IOptions<IndexingQueueOptions>>();

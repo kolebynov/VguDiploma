@@ -8,6 +8,10 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
     private readonly lastUpdateStatesTime: Record<string, Moment> = {};
     private isLoaded = false;
 
+    constructor() {
+        this.load();
+    }
+
     public updateState(document: GetDocument, newState: InProcessDocumentState, errorInfo = ""): void {
         const index = this.inProgressDocuments.value.findIndex(x => x.document.id === document.id);
         if (index > -1) {
@@ -48,17 +52,20 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
     subscribe(next: (value: InProgressDocument[]) => void, error: null, complete: () => void): Unsubscribable;
     subscribe(next?: (value: InProgressDocument[]) => void, error?: (error: any) => void, complete?: () => void): Unsubscribable;
     subscribe(next?: any, error?: any, complete?: any) {
-        this.load();
         return this.inProgressDocuments.subscribe(next, error, complete);
     }
 
-    private async load(): Promise<void> {
+    private load() {
         if (this.isLoaded) {
             return;
         }
 
-        const { data: { data } } = await axios.get<ApiResult<InProgressDocument[]>>("/api/inProgressDocuments?limit=1000");
-        this.inProgressDocuments.next(data);
+        axios
+            .get<ApiResult<InProgressDocument[]>>("/api/inProgressDocuments?limit=1000")
+            .then(({ data: { data } }) => {
+                this.isLoaded = true;
+                this.inProgressDocuments.next(data);
+            })
     }
 }
 

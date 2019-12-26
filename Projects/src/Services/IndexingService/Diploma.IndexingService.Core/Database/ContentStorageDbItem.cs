@@ -11,5 +11,7 @@ namespace Diploma.IndexingService.Core.Database
 		public byte[] Content { get; set; }
 
 		public DateTimeOffset Timestamp { get; set; }
+
+		public long Size { get; set; }
 	}
 }

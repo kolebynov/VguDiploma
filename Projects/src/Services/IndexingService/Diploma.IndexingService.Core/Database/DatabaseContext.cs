@@ -8,6 +8,10 @@ namespace Diploma.IndexingService.Core.Database
 
 		public DbSet<InProgressDocumentDbItem> InProgressDocuments { get; set; }
 
+		public DatabaseContext()
+		{
+		}
+
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
 		{
 		}

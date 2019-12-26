@@ -3,4 +3,6 @@
   &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\3.0.0\ref\netcoreapp3.0\Microsoft.Extensions.Hosting.Abstractions.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\3.0.0\ref\netcoreapp3.0\Microsoft.AspNetCore.Mvc.Core.dll" /&gt;&#xD;
   &lt;Assembly Path="C:\Users\Vitali\.nuget\packages\tikaondotnet.textextractor\1.17.1\lib\TikaOnDotNet.TextExtraction.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Vitali\.nuget\packages\toxy\1.6.1.1\lib\net45\Toxy.dll" /&gt;&#xD;
+  &lt;Assembly Path="C:\Users\Vitali\.nuget\packages\microsoft.data.sqlclient\1.0.19269.1\ref\netcoreapp2.1\Microsoft.Data.SqlClient.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String></wpf:ResourceDictionary>

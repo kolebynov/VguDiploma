@@ -49,7 +49,8 @@ namespace Diploma.IndexingService.Api.Extensions
 			{
 				Document = new GetDocumentDto { Id = inProgressDocument.Id.GetClientId(), FileName = inProgressDocument.FileName },
 				State = inProgressDocument.State,
-				ErrorInfo = inProgressDocument.ErrorInfo
+				ErrorInfo = inProgressDocument.ErrorInfo,
+				LastStatusUpdateTime = inProgressDocument.LastStatusUpdateTime
 			};
 		}
 

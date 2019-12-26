@@ -1,4 +1,5 @@
-﻿using Diploma.IndexingService.Core.Objects;
+﻿using System;
+using Diploma.IndexingService.Core.Objects;
 
 namespace Diploma.IndexingService.Api.Dto
 {
@@ -9,5 +10,7 @@ namespace Diploma.IndexingService.Api.Dto
 		public InProcessDocumentState State { get; set; }
 
 		public string ErrorInfo { get; set; }
+
+		public DateTimeOffset LastStatusUpdateTime { get; set; }
 	}
 }
