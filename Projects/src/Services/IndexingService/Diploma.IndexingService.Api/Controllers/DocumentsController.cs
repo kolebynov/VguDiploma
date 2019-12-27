@@ -27,33 +27,22 @@ namespace Diploma.IndexingService.Api.Controllers
 		private readonly IUserService userService;
 		private readonly IDocumentStorage documentStorage;
 		private readonly IContentTypeProvider contentTypeProvider;
+		private readonly IFoldersStorage foldersStorage;
 
 		public DocumentsController(
 			IMediator mediator,
 			ITempContentStorage tempContentStorage,
 			IUserService userService,
 			IDocumentStorage documentStorage,
-			IContentTypeProvider contentTypeProvider)
+			IContentTypeProvider contentTypeProvider,
+			IFoldersStorage foldersStorage)
 		{
 			this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 			this.tempContentStorage = tempContentStorage ?? throw new ArgumentNullException(nameof(tempContentStorage));
 			this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
 			this.documentStorage = documentStorage ?? throw new ArgumentNullException(nameof(documentStorage));
 			this.contentTypeProvider = contentTypeProvider ?? throw new ArgumentNullException(nameof(contentTypeProvider));
-		}
-
-		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<GetDocumentDto>>> GetDocuments([FromQuery] GetQuery query)
-		{
-			var documents =
-				await documentStorage.GetDocuments(await userService.GetCurrentUser(), query.Limit, query.Skip, CancellationToken.None);
-
-			return ApiResult.SuccessResultWithData((IReadOnlyCollection<GetDocumentDto>)documents.Select(x => new GetDocumentDto
-			{
-				Id = x.Id.GetClientId(),
-				FileName = x.FileName,
-				ModificationDate = x.ModificationDate
-			}).ToArray());
+			this.foldersStorage = foldersStorage ?? throw new ArgumentNullException(nameof(foldersStorage));
 		}
 
 		[HttpGet("{documentId}/content")]
@@ -76,15 +65,17 @@ namespace Diploma.IndexingService.Api.Controllers
 
 		[HttpPost]
 		public async Task<ApiResult<IReadOnlyCollection<AddDocumentResultDto>>> AddDocuments(
-			[FromBody]IReadOnlyCollection<AddDocumentDto> documents)
+			[FromBody]AddDocumentsInput input)
 		{
 			var documentsToAdd = new List<DocumentInfo>();
 			var currentUser = await userService.GetCurrentUser();
+			var parentFolder = await foldersStorage.GetFolder(new FolderIdentity(input.FolderId, currentUser.Id),
+				CancellationToken.None);
 
-			foreach (var documentDto in documents)
+			foreach (var documentDto in input.Documents)
 			{
 				var content = await tempContentStorage.GetTempContent(documentDto.ContentToken, CancellationToken.None);
-				documentsToAdd.Add(documentDto.ToDocumentInfo(content, currentUser));
+				documentsToAdd.Add(documentDto.ToDocumentInfo(content, currentUser, parentFolder));
 			}
 
 			var result = (await mediator.Send(new AddDocumentsCommand(documentsToAdd)));

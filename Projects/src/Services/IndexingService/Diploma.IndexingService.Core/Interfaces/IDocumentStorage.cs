@@ -9,9 +9,11 @@ namespace Diploma.IndexingService.Core.Interfaces
 	{
 		Task SaveDocumentToDb(FullDocumentInfo document, CancellationToken cancellationToken);
 
-		Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery, CancellationToken cancellationToken);
+		Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery, User user,
+			CancellationToken cancellationToken);
 
-		Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, int limit, int skip,
+		Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, FolderIdentity parentFolderId, int limit,
+			int skip,
 			CancellationToken cancellationToken);
 
 		Task<DocumentInfo> GetDocument(DocumentIdentity id, CancellationToken cancellationToken);

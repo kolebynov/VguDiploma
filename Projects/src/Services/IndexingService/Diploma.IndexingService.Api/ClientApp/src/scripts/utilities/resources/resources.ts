@@ -51,5 +51,15 @@ export default new Resources({
     }),
     inProgressDocumentList: new ResourceSet({
         "no_documents": "List of in-progress documents is empty"
+    }),
+    folders: new ResourceSet({
+        "add_folder": "Add new folder",
+        "folder_name": "Folder name",
+        "create_folder_dialog_text": "To create folder enter a name",
+        "folder_name_empty": "Folder name is empty"
+    }),
+    common: new ResourceSet({
+        "ok": "OK",
+        "cancel": "Cancel"
     })
 });

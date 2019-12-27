@@ -11,4 +11,9 @@ interface AddDocument {
     contentToken: string;
 }
 
-export { GetDocument, AddDocument };
+interface AddDocuments {
+    documents: AddDocument[];
+    folderId: string;
+}
+
+export { GetDocument, AddDocument, AddDocuments };

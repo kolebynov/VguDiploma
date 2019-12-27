@@ -10,7 +10,7 @@ import { InProgressDocumentList } from '.';
 
 signalrService.start();
 
-const useStyles = makeStyles((theme: Theme) => 
+const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       flexGrow: 1
@@ -54,7 +54,7 @@ const App: FunctionComponent = memo(() => {
 
     <Suspense fallback={null}>
       <Switch>
-        <Route path={"/myDocuments"} component={MyDocumentsPage} />
+        <Route path={"/myDocuments/:folderId?"} component={MyDocumentsPage} />
         <Route path={"/"} component={SearchPage} />
       </Switch>
     </Suspense>

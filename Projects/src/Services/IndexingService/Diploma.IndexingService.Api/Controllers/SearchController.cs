@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Diploma.Api.Shared.Dto;
 using Diploma.IndexingService.Api.Extensions;
+using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using Microsoft.AspNetCore.Mvc;
@@ -17,16 +18,18 @@ namespace Diploma.IndexingService.Api.Controllers
 	public class SearchController : ControllerBase
 	{
 		private readonly IDocumentStorage documentStorage;
+		private readonly IUserService userService;
 
-		public SearchController(IDocumentStorage documentStorage)
+		public SearchController(IDocumentStorage documentStorage, IUserService userService)
 		{
 			this.documentStorage = documentStorage ?? throw new ArgumentNullException(nameof(documentStorage));
+			this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
 		}
 
 		[HttpGet]
 		public async Task<ApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search([FromQuery] SearchQuery searchQuery) => 
 			ApiResult.SuccessResultWithData(
-				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(searchQuery, CancellationToken.None))
+				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(searchQuery, await userService.GetCurrentUser(), CancellationToken.None))
 					.Select(DtoExtensions.ToDto)
 					.ToArray());
 	}

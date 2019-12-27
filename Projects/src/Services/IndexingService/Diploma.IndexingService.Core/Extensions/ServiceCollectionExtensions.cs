@@ -44,6 +44,7 @@ namespace Diploma.IndexingService.Core.Extensions
 
 			services.AddScoped<IContentStorage, EfContentStorage>();
 			services.AddScoped<IInProgressDocumentsStorage, EfInProgressDocumentsStorage>();
+			services.AddScoped<IFoldersStorage, EfFoldersStorage>();
 
 			services.AddTransient<IIndexingQueue, IndexingQueue>();
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Diploma.Shared.Interfaces;
 
 namespace Diploma.IndexingService.Core.Objects
@@ -13,7 +14,12 @@ namespace Diploma.IndexingService.Core.Objects
 
 		public IContent Content { get; }
 
-		public DocumentInfo(DocumentIdentity id, string fileName, DateTimeOffset modificationDate, IContent content)
+		public FolderIdentity FolderId { get; }
+
+		public IReadOnlyList<FolderIdentity> ParentFoldersPath { get; }
+
+		public DocumentInfo(DocumentIdentity id, string fileName, DateTimeOffset modificationDate, IContent content,
+			FolderIdentity folderId, IReadOnlyList<FolderIdentity> parentFoldersPath)
 		{
 			if (string.IsNullOrEmpty(fileName))
 			{
@@ -24,6 +30,8 @@ namespace Diploma.IndexingService.Core.Objects
 			FileName = fileName;
 			ModificationDate = modificationDate;
 			Content = content ?? throw new ArgumentNullException(nameof(content));
+			FolderId = folderId ?? throw new ArgumentNullException(nameof(folderId));
+			ParentFoldersPath = parentFoldersPath ?? throw new ArgumentNullException(nameof(parentFoldersPath));
 		}
 	}
 }

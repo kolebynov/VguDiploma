@@ -10,7 +10,7 @@ using Diploma.IndexingService.EsDocumentStorage.Configuration;
 using Diploma.IndexingService.EsDocumentStorage.Interfaces;
 using Microsoft.Extensions.Options;
 using Nest;
-using DocumentInfoModel = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfo;
+using DocumentInfoModel = Diploma.IndexingService.EsDocumentStorage.Models.DocumentInfoModel;
 
 namespace Diploma.IndexingService.EsDocumentStorage
 {
@@ -44,7 +44,9 @@ namespace Diploma.IndexingService.EsDocumentStorage
 					Id = document.Id,
 					ModificationDate = document.ModificationDate,
 					FileName = document.FileName,
-					Text = textHighlighter.EscapeText(document.ExtractedText)
+					Text = textHighlighter.EscapeText(document.ExtractedText),
+					FolderId = document.FolderId.ToString(),
+					ParentFoldersPath = document.ParentFoldersPath.Select(x => x.ToString()).ToArray()
 				}
 			}, cancellationToken);
 
@@ -57,6 +59,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 		}
 
 		public async Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery,
+			User user,
 			CancellationToken cancellationToken)
 		{
 			if (searchQuery == null)
@@ -68,9 +71,13 @@ namespace Diploma.IndexingService.EsDocumentStorage
 				sd => sd
 					.Index(options.IndexName)
 					.Query(qd => qd
-						.MultiMatch(mmqd => mmqd
-							.Fields(new[] { "text", "fileName" })
-							.Query(searchQuery.SearchString)))
+						.Bool(bqd => bqd
+							.Must(
+								qcd => qcd.MultiMatch(mmqd => mmqd
+									.Fields(new[] { "text", "fileName" })
+									.Query(searchQuery.SearchString)),
+								qcd => qcd
+									.Term("id.userIdentity.keyword", user.Id))))
 					.Highlight(hs => hs
 						.Fields(hfd => hfd.Field("text"), hfd => hfd.Field("fileName")))
 					.Source(sfd => sfd.Includes(fd => fd.Field("fileName")))
@@ -90,14 +97,17 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			}).ToArray();
 		}
 
-		public async Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, int limit, int skip,
-			CancellationToken cancellationToken)
+		public async Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, FolderIdentity parentFolderId,
+			int limit, int skip, CancellationToken cancellationToken)
 		{
 			var response = await elasticClient.SearchAsync<DocumentInfoModel>(
 				sd => sd
 					.Index(options.IndexName)
 					.Query(qd => qd
-						.Term("id.userIdentity.keyword", user.Id))
+						.Bool(bqd => bqd
+							.Must(
+								qcd => qcd.Term("id.userIdentity.keyword", user.Id),
+								qcd => qcd.Term("folderId", parentFolderId.ToString()))))
 					.Source(sfd => sfd.Excludes(fd => fd.Field("text")))
 					.Take(limit)
 					.Skip(skip),
@@ -126,6 +136,8 @@ namespace Diploma.IndexingService.EsDocumentStorage
 				source.FileName,
 				source.ModificationDate,
 				new LazyContent(async () =>
-					(await contentStorage.Get(source.Id.ToString(), ContentCategory, cancellationToken)).Content));
+					(await contentStorage.Get(source.Id.ToString(), ContentCategory, cancellationToken)).Content),
+				FolderIdentity.FromString(source.FolderId),
+				source.ParentFoldersPath.Select(FolderIdentity.FromString).ToList());
 	}
 }

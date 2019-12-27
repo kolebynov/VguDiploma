@@ -3,7 +3,7 @@ import { resources } from "@app/utilities/resources";
 import { Button, makeStyles, createStyles } from "@material-ui/core";
 import { UploadDocumentItem } from "./uploadDocumentItem.component";
 import { AddDocumentModel, documentService } from "@app/services";
-import { getIdForDocument, getModificationDateForDocument } from "@app/utilities";
+import { getIdForDocument, getModificationDateForDocument, constants } from "@app/utilities";
 
 const resourceSet = resources.getResourceSet("uploadDocuments");
 const useStyles = makeStyles(theme => createStyles({
@@ -17,7 +17,7 @@ export const UploadDocuments: FunctionComponent = memo(() => {
     const classes = useStyles({});
 
     const uploadFiles = async () => {
-        documentService.addDocuments(filesToUpload, res =>
+        documentService.addDocuments(filesToUpload, constants.RootFolderId, res =>
             setFilesToUpload(prev => prev.filter(x => x.document.id !== res.id)));
     };
 

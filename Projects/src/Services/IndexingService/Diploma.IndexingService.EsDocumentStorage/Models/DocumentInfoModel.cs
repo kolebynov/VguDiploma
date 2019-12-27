@@ -3,7 +3,7 @@ using Diploma.IndexingService.Core.Objects;
 
 namespace Diploma.IndexingService.EsDocumentStorage.Models
 {
-	internal class DocumentInfo
+	internal class DocumentInfoModel
 	{
 		public DocumentIdentity Id { get; set; }
 
@@ -12,5 +12,9 @@ namespace Diploma.IndexingService.EsDocumentStorage.Models
 		public DateTimeOffset ModificationDate { get; set; }
 
 		public string Text { get; set; }
+
+		public string FolderId { get; set; }
+
+		public string[] ParentFoldersPath { get; set; }
 	}
 }
