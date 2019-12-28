@@ -1,26 +1,51 @@
 import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments } from "@app/models";
 import axios from "axios";
 import { inProgressDocumentService } from "./inProgressDocumentService";
+import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
+import { GetFolder } from "@app/models/folder";
 
 export interface AddDocumentModel {
     document: GetDocument;
     file: File;
 }
 
-class DocumentService {
-    public async addDocuments(documents: AddDocumentModel[], folderId: string,
-        callback: (res: AddDocumentResult) => void = null)
-        : Promise<AddDocumentResult[]> {
-        documents.forEach(({ document }) =>
-            inProgressDocumentService.updateState(document, InProcessDocumentState.WaitingToUpload));
+export enum UploadingState {
+    WaitingToUpload,
+    Uploading,
+    Error
+}
+
+export interface UploadingDocument {
+    state: UploadingState;
+    document: GetDocument;
+    folder: GetFolder;
+}
+
+class DocumentService implements Subscribable<UploadingDocument[]> {
+    private readonly uploadingDocuments = new BehaviorSubject<UploadingDocument[]>([]);
+
+    public async addDocuments(documents: AddDocumentModel[], folder: GetFolder): Promise<AddDocumentResult[]> {
+        this.uploadingDocuments.next(this.uploadingDocuments.value.concat(
+            documents.map(({ document }) => ({
+                state: UploadingState.WaitingToUpload,
+                document,
+                folder
+            }))
+        ));
 
         const results: AddDocumentResult[] = [];
         for (const document of documents) {
-            const result = await this.addDocument(document, folderId);
-            if (callback) {
-                callback(result);
+            const index = this.uploadingDocuments.value
+                .findIndex(x => x.document.id === document.document.id && x.folder.id === folder.id);
+            this.uploadingDocuments.value[index] = {
+                state: UploadingState.Uploading,
+                ...this.uploadingDocuments.value[index]
             }
+            const result = await this.addDocument(document, folder.id);
             results.push(result);
+
+            this.uploadingDocuments.next(this.uploadingDocuments.value
+                .filter(x => !(x.document.id === document.document.id && x.folder.id === folder.id)));
         }
 
         return results;
@@ -36,11 +61,18 @@ class DocumentService {
             .then(response => response.data.data);
     }
 
+    subscribe(observer?: PartialObserver<UploadingDocument[]>): Unsubscribable;
+    subscribe(next: null, error: null, complete: () => void): Unsubscribable;
+    subscribe(next: null, error: (error: any) => void, complete?: () => void): Unsubscribable;
+    subscribe(next: (value: UploadingDocument[]) => void, error: null, complete: () => void): Unsubscribable;
+    subscribe(next?: (value: UploadingDocument[]) => void, error?: (error: any) => void, complete?: () => void): Unsubscribable;
+    subscribe(next?: any, error?: any, complete?: any) {
+        return this.uploadingDocuments.subscribe(next, error, complete);
+    }
+
     private async addDocument({ file, document }: AddDocumentModel, folderId: string): Promise<AddDocumentResult> {
         const formData = new FormData();
         formData.append("files", file);
-
-        inProgressDocumentService.updateState(document, InProcessDocumentState.Uploading);
 
         const { data: { data: [contentToken] } } = await axios
             .post<ApiResult<string[]>>("/api/documents/upload", formData, {
@@ -48,8 +80,6 @@ class DocumentService {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-
-        inProgressDocumentService.updateState(document, InProcessDocumentState.Uploaded);
 
         const addDocuments: AddDocuments = {
             folderId,
@@ -61,7 +91,6 @@ class DocumentService {
             }]
         };
         const { data: { data: [result] } } = await axios.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, addDocuments);
-        inProgressDocumentService.updateState(document, result.state);
         return result;
     }
 }

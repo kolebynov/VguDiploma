@@ -1,9 +1,6 @@
 import { GetDocument } from "./document";
 
 enum InProcessDocumentState {
-    WaitingToUpload,
-    Uploading,
-    Uploaded,
     InQueue,
     Processing,
     Done,

@@ -25,8 +25,7 @@ export default new Resources({
         "found_text": "Text: "
     }),
     uploadDocuments: new ResourceSet({
-        "upload_button_title": "Upload",
-        "add_documents_title": "Add documents"
+        "upload_files_info_format": "Uploading {0} files"
     }),
     documentInfo: new ResourceSet({
         "file_name": "File Name",
@@ -60,6 +59,9 @@ export default new Resources({
     }),
     common: new ResourceSet({
         "ok": "OK",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "add": "Add",
+        "file": "File",
+        "folder": "Folder"
     })
 });

@@ -1,97 +1,138 @@
-import React, { FunctionComponent, memo, useState } from "react";
-import { Paper, Button, Dialog, DialogTitle, DialogContent, DialogContentText, TextField, DialogActions, Backdrop } from "@material-ui/core";
+import React, { FunctionComponent, memo, useState, useEffect } from "react";
+import { Paper, Button, makeStyles, Theme, createStyles, Menu, MenuItem, CircularProgress, Typography } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { GetFolder } from "@app/models/folder";
-import { folderService } from "@app/services";
+import { CreateFileDialog } from "./createFileDialog";
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { getIdForDocument, getModificationDateForDocument } from "@app/utilities";
+import { documentService, UploadingDocument } from "@app/services";
+import { format } from "@app/utilities/stringUtils";
 
-const resourceSet = resources.getResourceSet("folders");
 const commonResources = resources.getResourceSet("common");
+const uploadResources = resources.getResourceSet("uploadDocuments");
 
 export interface FolderItemsToolbarProps {
     onFolderAdd: (addedFolder: GetFolder) => void;
-    currentFolderId: string;
+    currentFolder: GetFolder;
 }
 
-export const FolderItemsToolbar: FunctionComponent<FolderItemsToolbarProps> = memo(({ onFolderAdd, currentFolderId }) => {
-    const [showDialog, setShowDialog] = useState(false);
-    const [folderName, setFolderName] = useState("");
-    const [creationError, setCreationError] = useState({
-        isError: false,
-        errorText: ""
-    });
-    const [isCreating, setIsCreating] = useState(false);
+const useStyles = makeStyles((theme: Theme) => createStyles({
+    button: {
+        marginLeft: theme.spacing(1)
+    },
+    uploadInfo: {
+        marginLeft: theme.spacing(4),
+        display: "inline-block"
+    },
+    uploadInfoText: {
+        paddingLeft: theme.spacing(1)
+    }
+}));
 
-    const handleClose = () => {
-        setShowDialog(false);
-        setFolderName("");
-        setCreationError({
-            isError: false,
-            errorText: ""
-        });
-        setIsCreating(false);
-    };
+interface UploadingItemsInfoProps {
+    count: number;
+}
 
-    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFolderName(e.target.value);
-        setCreationError({
-            isError: false,
-            errorText: ""
-        });
-    };
+const UploadingItemsInfo: FunctionComponent<UploadingItemsInfoProps> = memo(({ count }) => {
+    const styles = useStyles({});
 
-    const createFolder = async () => {
-        if (folderName.trim().length === 0) {
-            setCreationError({
-                isError: true,
-                errorText: resourceSet.getLocalizableValue("folder_name_empty")
-            })
-            return;
-        }
+    return (
+        <>
+            {count > 0
+                ? <span className={styles.uploadInfo}>
+                    <CircularProgress size={20} />
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        color="textSecondary"
+                        className={styles.uploadInfoText}
+                    >
+                        {format(uploadResources.getLocalizableValue("upload_files_info_format"), count)}
+                    </Typography>
+                </span>
+                : null}
+        </>
+    );
+});
 
-        setIsCreating(true);
+export const FolderItemsToolbar: FunctionComponent<FolderItemsToolbarProps> = memo(({ onFolderAdd, currentFolder }) => {
+    const [showCreateFileDialog, setShowCreateFileDialog] = useState(false);
+    const styles = useStyles({});
+    const [addMenuAnchorEl, setAddMenuAnchorEl] = useState<HTMLElement | null>(null);
+    const [uploadingDocuments, setUploadingDocuments] = useState<UploadingDocument[]>([]);
 
-        try {
-            const newFolder = await folderService.addFolder({
-                name: folderName,
-                parentId: currentFolderId
-            });
-            onFolderAdd(newFolder);
-        }
-        finally {
-            handleClose();
-        }
-    };
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.multiple = true;
+
+    useEffect(() => {
+        const sub = documentService.subscribe(setUploadingDocuments);
+        return () => sub.unsubscribe();
+    }, []);
+
+    const handleAddFolder = () => {
+        setAddMenuAnchorEl(null);
+        setShowCreateFileDialog(true);
+    }
+
+
+    const handleAddFile = () => {
+        setAddMenuAnchorEl(null);
+        fileInput.click();
+    }
+
+    const onFilesSelected = ({ target }: Event) => {
+        const inputTarget = (target as HTMLInputElement);
+        const [...files] = inputTarget.files;
+
+        const addFiles = files
+            .map(file => ({
+                document: {
+                    id: getIdForDocument(file, currentFolder),
+                    fileName: file.name,
+                    modificationDate: getModificationDateForDocument(file)
+                },
+                file
+            }));
+
+        documentService.addDocuments(addFiles, currentFolder);
+        fileInput.value = "";
+    }
+
+    fileInput.addEventListener("change", onFilesSelected);
 
     return (
         <Paper>
-            <Backdrop open={isCreating} style={{ zIndex: 9999 }} />
-            <Button variant="contained" onClick={() => setShowDialog(true)}>{resourceSet.getLocalizableValue("add_folder")}</Button>
-            <Dialog open={showDialog} aria-labelledby="form-dialog-title">
-                <DialogContent>
-                    <DialogContentText>
-                        {resourceSet.getLocalizableValue("create_folder_dialog_text")}
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="name"
-                        label={resourceSet.getLocalizableValue("folder_name")}
-                        fullWidth
-                        value={folderName}
-                        onChange={onInputChange}
-                        error={creationError.isError}
-                        helperText={creationError.errorText}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={createFolder} color="primary">
-                        {commonResources.getLocalizableValue("ok")}
-                    </Button>
-                    <Button onClick={handleClose} color="primary">
-                        {commonResources.getLocalizableValue("cancel")}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <Button
+                variant="contained"
+                color="primary"
+                endIcon={<ExpandMoreIcon />}
+                className={styles.button}
+                onClick={e => setAddMenuAnchorEl(e.currentTarget)}
+            >
+                {commonResources.getLocalizableValue("add")}
+            </Button>
+            <UploadingItemsInfo count={uploadingDocuments.length} />
+            <Menu
+                id="simple-menu"
+                anchorEl={addMenuAnchorEl}
+                keepMounted
+                open={Boolean(addMenuAnchorEl)}
+                onClose={() => setAddMenuAnchorEl(null)}
+                getContentAnchorEl={null}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+            >
+                <MenuItem onClick={handleAddFolder}>{commonResources.getLocalizableValue("folder")}</MenuItem>
+                <MenuItem onClick={handleAddFile}>{commonResources.getLocalizableValue("file")}</MenuItem>
+            </Menu>
+            {showCreateFileDialog
+                ? <CreateFileDialog
+                    currentFolderId={currentFolder.id}
+                    onClose={() => setShowCreateFileDialog(false)}
+                    onFolderAdd={onFolderAdd}
+                />
+                : null
+            }
         </Paper>
     );
 });

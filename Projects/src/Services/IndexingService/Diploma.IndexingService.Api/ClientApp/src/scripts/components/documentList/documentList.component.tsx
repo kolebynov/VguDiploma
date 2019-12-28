@@ -43,7 +43,7 @@ const DocumentList: FunctionComponent<DocumentListProps> = memo((props) => {
     };
 
     return (
-        <List>
+        <List style={{ paddingTop: "0px" }}>
             {props.canBackward
                 ? 
                     <ListItem divider={true} button={true} onDoubleClick={props.onBackward}>
