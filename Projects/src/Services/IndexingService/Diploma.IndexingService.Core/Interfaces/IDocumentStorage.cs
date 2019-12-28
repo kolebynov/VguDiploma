@@ -17,5 +17,9 @@ namespace Diploma.IndexingService.Core.Interfaces
 			CancellationToken cancellationToken);
 
 		Task<DocumentInfo> GetDocument(DocumentIdentity id, CancellationToken cancellationToken);
+
+		Task RemoveDocuments(IReadOnlyCollection<DocumentIdentity> documentIds, CancellationToken cancellationToken);
+
+		Task RemoveDocumentsFromFolder(FolderIdentity folderId, CancellationToken cancellationToken);
 	}
 }

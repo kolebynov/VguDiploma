@@ -2,7 +2,7 @@ import { InProgressDocument, InProcessDocumentState } from "@app/models";
 import { GetFolder } from "@app/models/folder";
 
 export function getIdForDocument({name, size}: File, { id }: GetFolder) {
-    return `$${id}_${name}_${size}`
+    return `${id}_${name}_${size}`
 }
 
 export function getModificationDateForDocument({lastModified}: File) {

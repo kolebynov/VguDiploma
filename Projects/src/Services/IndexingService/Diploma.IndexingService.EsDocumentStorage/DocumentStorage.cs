@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Diploma.IndexingService.Core.Exceptions;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Internal;
 using Diploma.IndexingService.Core.Objects;
@@ -50,10 +51,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 				}
 			}, cancellationToken);
 
-			if (!response.IsValid)
-			{
-				throw new InvalidOperationException("error");
-			}
+			CheckResponse(response, "Error during saving document into db");
 
 			await contentStorage.Save(document.Id.ToString(), ContentCategory, document.Content, cancellationToken);
 		}
@@ -130,6 +128,41 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			return ToDocumentInfo(response.Source, cancellationToken);
 		}
 
+		public async Task RemoveDocuments(IReadOnlyCollection<DocumentIdentity> documentIds, CancellationToken cancellationToken)
+		{
+			if (documentIds == null)
+			{
+				throw new ArgumentNullException(nameof(documentIds));
+			}
+
+			if (documentIds.Any())
+			{
+				var response = await elasticClient.BulkAsync(
+					sd => sd
+						.Index(options.IndexName)
+						.DeleteMany<DocumentInfoModel>(documentIds.Select(x => x.ToString())),
+					cancellationToken);
+
+				CheckResponse(response, "Error occured during removing documents.");
+			}
+		}
+
+		public async Task RemoveDocumentsFromFolder(FolderIdentity folderId, CancellationToken cancellationToken)
+		{
+			if (folderId == null)
+			{
+				throw new ArgumentNullException(nameof(folderId));
+			}
+
+			var response = await elasticClient.DeleteByQueryAsync<DocumentInfoModel>(dbqd => dbqd
+					.Index(options.IndexName)
+					.Query(qcd => qcd
+						.Term("parentFoldersPath", folderId.ToString())),
+				CancellationToken.None);
+
+			CheckResponse(response, $"Error occured during removing items from folder {folderId}");
+		}
+
 		private DocumentInfo ToDocumentInfo(DocumentInfoModel source, CancellationToken cancellationToken) =>
 			new DocumentInfo(
 				source.Id,
@@ -139,5 +172,13 @@ namespace Diploma.IndexingService.EsDocumentStorage
 					(await contentStorage.Get(source.Id.ToString(), ContentCategory, cancellationToken)).Content),
 				FolderIdentity.FromString(source.FolderId),
 				source.ParentFoldersPath.Select(FolderIdentity.FromString).ToList());
+
+		private static void CheckResponse(ResponseBase response, string errorText)
+		{
+			if (!response.IsValid || response.ServerError != null)
+			{
+				throw new DocumentStorageException(errorText, response.OriginalException);
+			}
+		}
 	}
 }

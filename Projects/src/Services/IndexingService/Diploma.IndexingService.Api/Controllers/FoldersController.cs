@@ -67,7 +67,8 @@ namespace Diploma.IndexingService.Api.Controllers
 				.ToArray();
 
 			return ApiResult.SuccessResultWithData((IReadOnlyCollection<GetFolderItem>)result);
-;		}
+			;
+		}
 
 		[HttpGet("{folderId}")]
 		public async Task<ApiResult<GetFolderDto>> GetFolder(Guid folderId)
@@ -92,6 +93,33 @@ namespace Diploma.IndexingService.Api.Controllers
 				CancellationToken.None);
 
 			return ApiResult.SuccessResultWithData(newFolder.ToDto());
+		}
+
+		[HttpDelete("items")]
+		public async Task<ApiResult> RemoveFolderItems([FromBody] IReadOnlyCollection<GetFolderItem> itemsToRemove)
+		{
+			var currentUser = await userService.GetCurrentUser();
+			var foldersToRemove = itemsToRemove
+				.Where(x => x.Folder != null)
+				.Select(x => new FolderIdentity(x.Folder.Id, currentUser.Id))
+				.ToArray();
+			await foldersStorage.RemoveFolders(
+				foldersToRemove,
+				CancellationToken.None);
+
+			foreach (var folderId in foldersToRemove)
+			{
+				await documentStorage.RemoveDocumentsFromFolder(folderId, CancellationToken.None);
+			}
+			
+			await documentStorage.RemoveDocuments(
+				itemsToRemove
+					.Where(x => x.Document != null)
+					.Select(x => new DocumentIdentity(x.Document.Id, currentUser.Id))
+					.ToArray(),
+				CancellationToken.None);
+
+			return ApiResult.SuccessResult;
 		}
 	}
 }

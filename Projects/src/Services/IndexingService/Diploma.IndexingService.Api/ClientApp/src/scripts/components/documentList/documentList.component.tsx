@@ -7,8 +7,9 @@ import { toUiDateTime } from "@app/utilities/dateTimeUtils";
 import { GetFolderItem, GetFolder } from "@app/models/folder";
 
 interface DocumentListProps {
-    items: Array<GetFolderItem>;
-    onItemSelect?: (item: GetFolderItem) => void;
+    items: GetFolderItem[];
+    selectedItems: GetFolderItem[];
+    onItemsSelect?: (item: GetFolderItem[]) => void;
     onFolderEnter: (folder: GetFolder) => void;
     canBackward: boolean;
     onBackward: () => void;
@@ -33,12 +34,9 @@ const Document: FunctionComponent<{document: GetDocument}> = memo(({ document })
 ));
 
 const DocumentList: FunctionComponent<DocumentListProps> = memo((props) => {
-    var [selectedItem, setSelectedItem] = useState({} as GetFolderItem);
-
     const onDocumentSelect = (item: GetFolderItem) => {
-        setSelectedItem(item);
-        if (props.onItemSelect) {
-            props.onItemSelect(item);
+        if (props.onItemsSelect) {
+            props.onItemsSelect([item]);
         }
     };
 
@@ -54,7 +52,7 @@ const DocumentList: FunctionComponent<DocumentListProps> = memo((props) => {
                 <ListItem
                     key={item.document ? item.document.id : item.folder.id}
                     divider={true} button={true}
-                    selected={item === selectedItem} onClick={() => onDocumentSelect(item)}
+                    selected={props.selectedItems.includes(item)} onClick={() => onDocumentSelect(item)}
                     onDoubleClick={() => item.folder ? props.onFolderEnter(item.folder) : null}
                 >
                     {item.document

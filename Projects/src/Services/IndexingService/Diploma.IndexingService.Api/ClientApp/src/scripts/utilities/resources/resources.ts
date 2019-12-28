@@ -40,9 +40,6 @@ export default new Resources({
         "locale": "en"
     }),
     inProgressDocumentState: new ResourceSet({
-        "WaitingToUpload": "Waiting to upload",
-        "Uploading": "Uploading",
-        "Uploaded": "Uploaded",
         "InQueue": "In processing queue",
         "Processing": "Processing",
         "Done": "Processing done",
@@ -55,13 +52,17 @@ export default new Resources({
         "add_folder": "Add new folder",
         "folder_name": "Folder name",
         "create_folder_dialog_text": "To create folder enter a name",
-        "folder_name_empty": "Folder name is empty"
+        "folder_name_empty": "Folder name is empty",
+        "remove_items_dialog": "Do you really want to remove this item?",
+        "document_info_label": "Show info"
     }),
     common: new ResourceSet({
         "ok": "OK",
         "cancel": "Cancel",
         "add": "Add",
         "file": "File",
-        "folder": "Folder"
+        "folder": "Folder",
+        "actions": "Actions",
+        "remove": "Remove"
     })
 });

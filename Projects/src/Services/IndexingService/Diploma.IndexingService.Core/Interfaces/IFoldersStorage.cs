@@ -15,5 +15,7 @@ namespace Diploma.IndexingService.Core.Interfaces
 		Task<int> GetFoldersCount(FolderIdentity parentFolderId, CancellationToken cancellationToken);
 
 		Task<Folder> AddFolder(Folder folder, CancellationToken cancellationToken);
+
+		Task RemoveFolders(IReadOnlyCollection<FolderIdentity> folderIds, CancellationToken cancellationToken);
 	}
 }

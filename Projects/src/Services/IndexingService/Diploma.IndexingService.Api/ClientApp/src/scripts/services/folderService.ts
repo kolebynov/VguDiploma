@@ -23,6 +23,12 @@ class FolderService {
 
         return data;
     }
+
+    public removeItems(itemsToRemove: GetFolderItem[]): Promise<void> {
+        return axios.delete("/api/folders/items", {
+            data: itemsToRemove
+        });
+    }
 }
 
 export const folderService = new FolderService();

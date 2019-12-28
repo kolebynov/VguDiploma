@@ -26,13 +26,31 @@ namespace Diploma.IndexingService.EsDocumentStorage.Extensions
 				var pool = new SingleNodeConnectionPool(options.ElasticSearchUri);
 				var connectionSettings = new ConnectionSettings(pool, JsonNetSerializer.Default);
 
-				return new ElasticClient(connectionSettings);
+				var elasticClient = new ElasticClient(connectionSettings);
+				InitIndex(elasticClient, options);
+				return elasticClient;
 			});
 			services.AddSingleton<ITextHighlighter, TextHighlighter>();
 
 			services.AddScoped<IDocumentStorage, DocumentStorage>();
 
 			return services;
+		}
+
+		private static void InitIndex(IElasticClient elasticClient, DocumentStorageOptions options)
+		{
+			if (!elasticClient.Indices.Exists(options.IndexName).Exists)
+			{
+				var response = elasticClient.Indices.Create(
+					options.IndexName,
+					cid => cid
+						.Settings(isd => isd
+							.Setting("index.highlight.max_analyzed_offset", options.MaxAnalyzedOffsetForHighlighting)));
+				if (!response.IsValid)
+				{
+					throw new InvalidOperationException("Unable to create index", response.OriginalException);
+				}
+			}
 		}
 	}
 }

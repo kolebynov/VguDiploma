@@ -14,12 +14,15 @@ interface FolderItemsProps {
 
 const MyDocuments: FunctionComponent<FolderItemsProps> = memo(({ folderId }) => {
     var [folderItems, setFolderItems] = useState(new Array<GetFolderItem>());
-    var [selectedItem, setSelectedItem] = useState<GetFolderItem>(null);
+    var [selectedItems, setSelectedItems] = useState<GetFolderItem[]>([]);
     var [isLoading, setLoading] = useState(false);
     var [currentFolder, setCurrentFolder] = useState(null as GetFolder);
 
-    useEffect(() => {
+    const reloadItems = () => {
         setLoading(true);
+        setSelectedItems([]);
+        setFolderItems([]);
+
         const promises: Promise<any>[] = [];
 
         if (folderId !== constants.RootFolderId) {
@@ -34,7 +37,9 @@ const MyDocuments: FunctionComponent<FolderItemsProps> = memo(({ folderId }) => 
 
         promises.push(folderService.getItems(folderId).then(setFolderItems));
         Promise.all(promises).then(() => setLoading(false));
-    }, [folderId]);
+    }
+
+    useEffect(reloadItems, [folderId]);
 
     const onFolderAdd = (newFolder: GetFolder) => {
         let insertIndex = folderItems.findIndex(x => x.folder && x.folder.name > newFolder.name);
@@ -52,21 +57,23 @@ const MyDocuments: FunctionComponent<FolderItemsProps> = memo(({ folderId }) => 
 
     return (
         <div>
+            <FolderItemsToolbar
+                currentFolder={currentFolder}
+                onFolderAdd={onFolderAdd}
+                disabled={isLoading}
+                selectedItems={selectedItems}
+                onSelectedItemsRemoved={reloadItems}
+            />
             {isLoading
                 ? <Loader />
-                : <>
-                    <FolderItemsToolbar currentFolder={currentFolder} onFolderAdd={onFolderAdd} />
-                    <DocumentList
-                        items={folderItems}
-                        onItemSelect={item => setSelectedItem(folderItems.find(x => x === item))}
-                        onFolderEnter={({ id }) => history.push(`/myDocuments/${id}`)}
-                        canBackward={folderId !== constants.RootFolderId}
-                        onBackward={() => history.push(`/myDocuments/${currentFolder.parentId}`)}
-                    />
-                </>}
-            <Drawer anchor="right" open={Boolean(selectedItem && selectedItem.document)} onClose={() => setSelectedItem(null)}>
-                {selectedItem && selectedItem.document ? <DocumentInfo document={selectedItem.document} /> : null}
-            </Drawer>
+                : <DocumentList
+                    items={folderItems}
+                    onItemsSelect={setSelectedItems}
+                    onFolderEnter={({ id }) => history.push(`/myDocuments/${id}`)}
+                    canBackward={folderId !== constants.RootFolderId}
+                    onBackward={() => history.push(`/myDocuments/${currentFolder.parentId}`)}
+                    selectedItems={selectedItems}
+                />}
         </div>
     );
 });

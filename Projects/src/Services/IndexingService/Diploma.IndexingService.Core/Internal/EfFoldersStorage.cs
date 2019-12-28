@@ -47,5 +47,43 @@ namespace Diploma.IndexingService.Core.Internal
 
 			return folder;
 		}
+
+		public Task RemoveFolders(IReadOnlyCollection<FolderIdentity> folderIds, CancellationToken cancellationToken)
+		{
+			return ResilientTransaction.New(context).ExecuteAsync(async () =>
+			{
+				foreach (var folderId in folderIds)
+				{
+					await RemoveFolder(await GetFolder(folderId, cancellationToken), cancellationToken);
+				}
+
+				await context.SaveChangesAsync(cancellationToken);
+			});
+		}
+
+		private async Task RemoveFolder(Folder folder, CancellationToken cancellationToken)
+		{
+			List<Folder> subFolders;
+			int skip = 0;
+			int limit = 1000;
+
+			do
+			{
+				subFolders = await context.Folders
+					.Where(x => x.ParentId == folder.Id)
+					.Take(limit)
+					.Skip(skip)
+					.ToListAsync(cancellationToken);
+				foreach (var subFolder in subFolders)
+				{
+					await RemoveFolder(subFolder, cancellationToken);
+				}
+
+				skip += limit;
+			}
+			while (subFolders.Any());
+
+			context.Folders.Remove(folder);
+		}
 	}
 }
