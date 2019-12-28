@@ -88,7 +88,7 @@ namespace Diploma.IndexingService.Api.Controllers
 			var newFolderId = new FolderIdentity(Guid.NewGuid(), currentUser.Id);
 			var newFolder = await foldersStorage.AddFolder(
 				new Folder(newFolderId, addFolder.Name, parentFolder.Id,
-					parentFolder.ParentsPath.Concat(newFolderId.AsArray()).ToList()),
+					parentFolder.ParentsPath.Concat(parentFolder.Id.AsArray()).ToList()),
 				CancellationToken.None);
 
 			return ApiResult.SuccessResultWithData(newFolder.ToDto());
