@@ -23,6 +23,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.Api.Shared", "src\I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Diploma.IndexingService.EsDocumentStorage", "src\Services\IndexingService\Diploma.IndexingService.EsDocumentStorage\Diploma.IndexingService.EsDocumentStorage.csproj", "{4DE52971-14D6-433F-BC19-D54572548BDB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4B42F468-F9AC-45BC-B844-199DF8676F74}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.onlyservices.yml = docker-compose.onlyservices.yml
+		docker-compose.override.yml = docker-compose.override.yml
+		docker-compose.yml = docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

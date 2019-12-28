@@ -4,6 +4,13 @@ services:
   elasticsearch:
     environment:
       - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+  mssql:
+    ports:
+      - "1433:1433"
 
   diploma.indexingservice.api:
     environment:
