@@ -46,8 +46,6 @@ namespace Diploma.IndexingService.Core
 					logger.LogError(e, "Error while processing document {documentId} ({documentFileName})", document.Id, document.FileName);
 					await inProgressDocumentsStorage.SetErrorState(document, e.Message, stoppingToken);
 				}
-
-				await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 			}
 		}
 	}

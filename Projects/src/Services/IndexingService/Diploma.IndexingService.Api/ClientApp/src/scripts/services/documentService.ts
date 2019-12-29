@@ -1,4 +1,4 @@
-import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments } from "@app/models";
+import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments, PaginationApiResult } from "@app/models";
 import axios from "axios";
 import { inProgressDocumentService } from "./inProgressDocumentService";
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
@@ -55,10 +55,15 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
         return `/api/documents/${docId}/content`;
     }
 
-    public search(searchString: string): Promise<FoundDocument[]> {
-        return axios
-            .get<ApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}`)
-            .then(response => response.data.data);
+    public async search(searchString: string, limit = 10, skip = 0)
+        : Promise<{documents: FoundDocument[], totalCount: number}> {
+        const { data: { data, pagination } } = await axios
+            .get<PaginationApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}&limit=${limit}&skip=${skip}`);
+
+        return {
+            documents: data,
+            totalCount: pagination.totalCount
+        }
     }
 
     subscribe(observer?: PartialObserver<UploadingDocument[]>): Unsubscribable;

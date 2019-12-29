@@ -27,10 +27,15 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet]
-		public async Task<ApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search([FromQuery] SearchQuery searchQuery) => 
-			ApiResult.SuccessResultWithData(
-				(IReadOnlyCollection<FoundDocumentDto>)(await documentStorage.Search(searchQuery, await userService.GetCurrentUser(), CancellationToken.None))
-					.Select(DtoExtensions.ToDto)
-					.ToArray());
+		public async Task<PaginationApiResult<IReadOnlyCollection<FoundDocumentDto>>> Search([FromQuery] SearchQuery searchQuery)
+		{
+			var searchResult = await documentStorage.Search(searchQuery, await userService.GetCurrentUser(), CancellationToken.None);
+			var dtos = (IReadOnlyCollection<FoundDocumentDto>)searchResult.FoundDocuments
+				.Select(DtoExtensions.ToDto)
+				.ToArray();
+
+			return ApiResult.SuccessPaginationResult(
+				dtos, new PaginationData {TotalCount = searchResult.TotalDocuments});
+		}
 	}
 }

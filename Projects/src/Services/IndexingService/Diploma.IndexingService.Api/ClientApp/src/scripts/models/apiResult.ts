@@ -8,4 +8,12 @@ interface ApiResult<TData> {
     data?: TData;
 }
 
-export { ApiError, ApiResult };
+interface PaginationData {
+    totalCount: number;
+}
+
+interface PaginationApiResult<TData> extends ApiResult<TData> {
+    pagination: PaginationData;
+}
+
+export { ApiError, ApiResult, PaginationData, PaginationApiResult };

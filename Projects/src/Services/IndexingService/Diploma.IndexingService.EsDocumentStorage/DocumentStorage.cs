@@ -56,7 +56,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			await contentStorage.Save(document.Id.ToString(), ContentCategory, document.Content, cancellationToken);
 		}
 
-		public async Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery,
+		public async Task<SearchResult> Search(SearchQuery searchQuery,
 			User user,
 			CancellationToken cancellationToken)
 		{
@@ -83,7 +83,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 					.Take(searchQuery.Limit),
 				cancellationToken);
 
-			return response.Hits.Select(hit => new FoundDocument
+			var foundDocuments = response.Hits.Select(hit => new FoundDocument
 			{
 				DocumentId = DocumentIdentity.FromString(hit.Id),
 				Matches = hit.Highlight
@@ -93,6 +93,8 @@ namespace Diploma.IndexingService.EsDocumentStorage
 							x.Value.Select(y => textHighlighter.ParseHighlightedText(y)).ToArray()),
 				FileName = hit.Source.FileName
 			}).ToArray();
+
+			return new SearchResult(foundDocuments, (int)response.HitsMetadata.Total.Value);
 		}
 
 		public async Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, FolderIdentity parentFolderId,
@@ -161,6 +163,25 @@ namespace Diploma.IndexingService.EsDocumentStorage
 				CancellationToken.None);
 
 			CheckResponse(response, $"Error occured during removing items from folder {folderId}");
+		}
+
+		public async Task<int> GetDocumentsCount(FolderIdentity folderId, CancellationToken cancellationToken)
+		{
+			if (folderId == null)
+			{
+				throw new ArgumentNullException(nameof(folderId));
+			}
+
+			var response = await elasticClient.CountAsync<DocumentInfoModel>(
+				cd => cd
+					.Index(options.IndexName)
+					.Query(qcd => qcd
+						.Term("folderId", folderId.ToString())),
+				cancellationToken);
+
+			CheckResponse(response, "Error during getting count documents in folder");
+
+			return (int)response.Count;
 		}
 
 		private DocumentInfo ToDocumentInfo(DocumentInfoModel source, CancellationToken cancellationToken) =>

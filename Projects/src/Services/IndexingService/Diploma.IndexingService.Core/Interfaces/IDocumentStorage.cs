@@ -9,7 +9,7 @@ namespace Diploma.IndexingService.Core.Interfaces
 	{
 		Task SaveDocumentToDb(FullDocumentInfo document, CancellationToken cancellationToken);
 
-		Task<IReadOnlyCollection<FoundDocument>> Search(SearchQuery searchQuery, User user,
+		Task<SearchResult> Search(SearchQuery searchQuery, User user,
 			CancellationToken cancellationToken);
 
 		Task<IReadOnlyCollection<DocumentInfo>> GetDocuments(User user, FolderIdentity parentFolderId, int limit,
@@ -21,5 +21,7 @@ namespace Diploma.IndexingService.Core.Interfaces
 		Task RemoveDocuments(IReadOnlyCollection<DocumentIdentity> documentIds, CancellationToken cancellationToken);
 
 		Task RemoveDocumentsFromFolder(FolderIdentity folderId, CancellationToken cancellationToken);
+
+		Task<int> GetDocumentsCount(FolderIdentity folderId, CancellationToken cancellationToken);
 	}
 }

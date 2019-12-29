@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 
 namespace Diploma.Api.Shared.Dto
 {
@@ -28,6 +29,21 @@ namespace Diploma.Api.Shared.Dto
 				Data = data,
 				Success = true
 			};
+
+		public static PaginationApiResult<TData> SuccessPaginationResult<TData>(TData data, PaginationData pagination)
+		{
+			if (pagination == null)
+			{
+				throw new ArgumentNullException(nameof(pagination));
+			}
+
+			return new PaginationApiResult<TData>
+			{
+				Success = true,
+				Pagination = pagination,
+				Data = data
+			};
+		}
 	}
 
 	[DataContract]

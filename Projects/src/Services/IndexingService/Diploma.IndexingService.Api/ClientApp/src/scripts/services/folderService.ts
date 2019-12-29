@@ -1,13 +1,17 @@
 import { GetFolderItem, AddFolder, GetFolder } from "@app/models/folder";
-import { ApiResult } from "@app/models";
+import { ApiResult, PaginationApiResult } from "@app/models";
 import axios from "axios";
 
 class FolderService {
-    public async getItems(folderId: string): Promise<GetFolderItem[]> {
-        const { data: { data } } = await axios
-            .get<ApiResult<GetFolderItem[]>>(`/api/folders/${folderId}/items`);
+    public async getItems(folderId: string, limit: number = 10, skip: number = 0)
+        : Promise<{items: GetFolderItem[], totalCount: number}> {
+        const { data: { data, pagination } } = await axios
+            .get<PaginationApiResult<GetFolderItem[]>>(`/api/folders/${folderId}/items?limit=${limit}&skip=${skip}`);
 
-        return data;
+        return {
+            items: data,
+            totalCount: pagination.totalCount
+        };
     }
 
     public async addFolder(folder: AddFolder): Promise<GetFolder> {
