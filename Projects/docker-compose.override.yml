@@ -19,4 +19,4 @@ services:
       - documentStorage:elasticSearchUri=http://elasticsearch:9200
     ports:
       - "80:80"
-    entrypoint: ["./wait-for-it.sh", "elasticsearch:9200", "&&", "./wait-for-it.sh", "mssql:1433", "--", "dotnet", "Diploma.IndexingService.Api.dll"]
+    entrypoint: ["./wait-for-it.sh", "-t", "60", "elasticsearch:9200", "&&", "./wait-for-it.sh", "-t", "60", "mssql:1433", "--", "dotnet", "Diploma.IndexingService.Api.dll"]
