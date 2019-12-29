@@ -24,7 +24,8 @@ namespace Diploma.IndexingService.EsDocumentStorage.Extensions
 			{
 				var options = sp.GetRequiredService<IOptions<DocumentStorageOptions>>().Value;
 				var pool = new SingleNodeConnectionPool(options.ElasticSearchUri);
-				var connectionSettings = new ConnectionSettings(pool, JsonNetSerializer.Default);
+				var connectionSettings = new ConnectionSettings(pool, JsonNetSerializer.Default)
+					.MaximumRetries(10);
 
 				var elasticClient = new ElasticClient(connectionSettings);
 				InitIndex(elasticClient, options);
