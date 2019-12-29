@@ -22,5 +22,6 @@ WORKDIR /app
 EXPOSE 80
 COPY --from=build /app/publish .
 COPY --from=client_build /ClientApp/wwwroot ./wwwroot/
-COPY wait-for-it.sh /usr/bin/wait-for-it.sh
+COPY wait-for-it.sh ./wait-for-it.sh
+RUN ["chmod", "+x", "./wait-for-it.sh"]
 ENTRYPOINT ["dotnet", "Diploma.IndexingService.Api.dll"]
