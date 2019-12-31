@@ -6,31 +6,26 @@ namespace Diploma.IndexingService.Core.Objects
 	{
 		public string Id { get; }
 
-		public string UserIdentity { get; }
+		public Guid UserIdentity { get; }
 
-		public DocumentIdentity(string id, string userIdentity)
+		public DocumentIdentity(string id, Guid userIdentity)
 		{
 			if (string.IsNullOrEmpty(id))
 			{
 				throw new ArgumentException("Value cannot be null or empty.", nameof(id));
 			}
 
-			if (string.IsNullOrEmpty(userIdentity))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(userIdentity));
-			}
-
 			Id = id;
 			UserIdentity = userIdentity;
 		}
 
-		public void Deconstruct(out string id, out string userIdentity)
+		public void Deconstruct(out string id, out Guid userIdentity)
 		{
 			id = Id;
 			userIdentity = UserIdentity;
 		}
 
-		public override string ToString() => $"{Id}_{UserIdentity}";
+		public override string ToString() => $"{Id}_{UserIdentity:N}";
 
 		public static DocumentIdentity FromString(string stringId)
 		{
@@ -40,7 +35,7 @@ namespace Diploma.IndexingService.Core.Objects
 				throw new FormatException("Input string doesn't have separator");
 			}
 
-			return new DocumentIdentity(stringId.Substring(0, lastIndex), stringId.Substring(lastIndex + 1));
+			return new DocumentIdentity(stringId.Substring(0, lastIndex), new Guid(stringId.Substring(lastIndex + 1)));
 		}
 	}
 }

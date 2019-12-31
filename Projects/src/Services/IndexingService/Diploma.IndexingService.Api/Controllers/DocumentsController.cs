@@ -12,6 +12,7 @@ using Diploma.IndexingService.Core.Commands;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -20,6 +21,7 @@ namespace Diploma.IndexingService.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class DocumentsController : ControllerBase
 	{
 		private readonly IMediator mediator;

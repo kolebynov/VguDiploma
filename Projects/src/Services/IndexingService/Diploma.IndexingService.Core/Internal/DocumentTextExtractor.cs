@@ -18,7 +18,7 @@ namespace Diploma.IndexingService.Core.Internal
 			{
 				var path = Path.Combine(Path.GetTempPath(), fileName);
 				var toxyParser = ParserFactory.CreateText(new ParserContext(path));
-				await using (var fileStream = File.Create(path))
+				await using (var fileStream = File.Create(path, 81920, FileOptions.Asynchronous))
 				{
 					await stream.CopyToAsync(fileStream, cancellationToken);
 				}

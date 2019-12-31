@@ -7,6 +7,7 @@ using Diploma.IndexingService.Core.Database;
 using Diploma.IndexingService.Core.Events;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
+using EFCore.BulkExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +34,8 @@ namespace Diploma.IndexingService.Core.Internal
 			return UpdateStateInternal(document, InProcessDocumentState.Error, errorInfo, cancellationToken);
 		}
 
-		public async Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(string userIdentity, int limit, int skip,
+		public async Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(Guid userIdentity, int limit,
+			int skip,
 			CancellationToken cancellationToken) =>
 			await context.InProgressDocuments.Where(x => x.UserIdentity == userIdentity)
 				.Skip(skip)
@@ -55,6 +57,11 @@ namespace Diploma.IndexingService.Core.Internal
 			}
 
 			await context.SaveChangesAsync(cancellationToken);
+		}
+
+		public Task RemoveAll(CancellationToken cancellationToken)
+		{
+			return context.InProgressDocuments.BatchDeleteAsync(cancellationToken);
 		}
 
 		private async Task UpdateStateInternal(DocumentInfo document, InProcessDocumentState newState, string errorInfo,

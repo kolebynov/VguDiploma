@@ -1,23 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace Diploma.IndexingService.Core.Objects
 {
-	public class User
+	public class User : IdentityUser<Guid>
 	{
-		public string Id { get; private set; }
-
-		public User(string id)
-		{
-			if (string.IsNullOrEmpty(id))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(id));
-			}
-
-			Id = id;
-		}
-
-		private User()
-		{
-		}
 	}
 }

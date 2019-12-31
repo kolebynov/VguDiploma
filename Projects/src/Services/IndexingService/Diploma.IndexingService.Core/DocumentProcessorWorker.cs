@@ -29,6 +29,8 @@ namespace Diploma.IndexingService.Core
 			var inProgressDocumentsStorage = serviceProvider.GetRequiredService<IInProgressDocumentsStorage>();
 			var indexingQueue = serviceProvider.GetRequiredService<IIndexingQueue>();
 
+			await inProgressDocumentsStorage.RemoveAll(stoppingToken);
+
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				var document = await indexingQueue.Dequeue(stoppingToken);

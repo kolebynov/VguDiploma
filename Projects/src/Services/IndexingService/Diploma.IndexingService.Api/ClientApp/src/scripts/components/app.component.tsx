@@ -1,64 +1,45 @@
-import React, { FunctionComponent, memo, Suspense, useState } from 'react';
-import { Router, Switch, Route, Redirect } from 'react-router';
-import { SearchPage, MyDocumentsPage } from '@app/pages';
+import React, { FunctionComponent, memo, Suspense, useState, useEffect } from 'react';
+import { Router, Switch, Route } from 'react-router';
 import { history } from '@app/utilities';
-import { Link, LinkProps } from 'react-router-dom';
-import { AppBar, Toolbar, Button, makeStyles, createStyles, Theme, Drawer } from '@material-ui/core';
-import { resources } from '@app/utilities/resources';
 import { signalrService } from '@app/services';
-import { InProgressDocumentList } from '.';
+import { LoginPage } from '@app/pages/loginPage/loginPage.component';
+import { Loader } from './loader/loader.component';
+import { MainPage } from '@app/pages/mainPage/mainPage.component';
+import { userService } from '@app/services/userService';
 
 signalrService.start();
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1
-    }
-  }));
+const loginWrapped = (WrappedComponent: FunctionComponent): FunctionComponent =>
+  memo(() => {
+    const [isLogin, setIsLogin] = useState(false);
 
-const resourceSet = resources.getResourceSet("app");
+    useEffect(() => {
+      userService.isLogin().then(res => {
+        setIsLogin(res);
+        if (!res) {
+          history.push("/login");
+        }
+      });
+    }, [true]);
+
+    return (
+      <>
+        {isLogin ? <WrappedComponent /> : null}
+      </>
+    );
+  });
 
 const App: FunctionComponent = memo(() => {
-  const classes = useStyles({});
-  const [showInProgress, setShowInProgress] = useState(false);
-
-  const searchLink = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
-    (props, ref) => <Link innerRef={ref} to="/" {...props} />,
+  return (
+    <Router history={history}>
+      <Suspense fallback={<Loader />}>
+        <Switch>
+          <Route path={"/login"} component={LoginPage} />
+          <Route path={"*"} component={loginWrapped(MainPage)} />
+        </Switch>
+      </Suspense>
+    </Router>
   );
-
-  const myDocumentsLink = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
-    (props, ref) => <Link innerRef={ref} to="/myDocuments" {...props} />,
-  );
-
-  return (<Router history={history}>
-    <div className={classes.root}>
-      <AppBar position="static">
-        <Toolbar>
-          <Button color="inherit" component={searchLink}>
-            {resourceSet.getLocalizableValue("search_link")}
-          </Button>
-          <Button color="inherit" component={myDocumentsLink}>
-            {resourceSet.getLocalizableValue("my_documents_link")}
-          </Button>
-          <Button color="inherit" onClick={() => setShowInProgress(true)}>
-            Show in-progress documents
-          </Button>
-        </Toolbar>
-      </AppBar>
-    </div>
-
-    <Drawer open={showInProgress} anchor="right" onClose={() => setShowInProgress(false)}>
-      <InProgressDocumentList />
-    </Drawer>
-
-    <Suspense fallback={null}>
-      <Switch>
-        <Route path={"/myDocuments/:folderId?"} component={MyDocumentsPage} />
-        <Route path={"/"} component={SearchPage} />
-      </Switch>
-    </Suspense>
-  </Router>);
 });
 
 export { App };

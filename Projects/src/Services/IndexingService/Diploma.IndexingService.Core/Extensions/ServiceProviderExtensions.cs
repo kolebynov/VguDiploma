@@ -14,8 +14,7 @@ namespace Diploma.IndexingService.Core.Extensions
 				throw new ArgumentNullException(nameof(serviceProvider));
 			}
 
-			using var scope = serviceProvider.CreateScope();
-			scope.ServiceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
+			serviceProvider.GetRequiredService<DatabaseContext>().Database.Migrate();
 
 			return serviceProvider;
 		}

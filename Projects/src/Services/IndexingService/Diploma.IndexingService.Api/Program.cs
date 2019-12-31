@@ -1,6 +1,8 @@
-﻿using Diploma.IndexingService.Core.Extensions;
+﻿using Diploma.IndexingService.Api.Extensions;
+using Diploma.IndexingService.Core.Extensions;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Diploma.IndexingService.Api
 {
@@ -9,7 +11,13 @@ namespace Diploma.IndexingService.Api
 		public static void Main(string[] args)
 		{
 			var webHost = CreateWebHostBuilder(args).Build();
-			webHost.Services.MigrateContentDatabase();
+			using (var scope = webHost.Services.CreateScope())
+			{
+				scope.ServiceProvider
+					.MigrateContentDatabase()
+					.AddDefaultUsersAndRoles();
+			}
+
 			webHost.Run();
 		}
 

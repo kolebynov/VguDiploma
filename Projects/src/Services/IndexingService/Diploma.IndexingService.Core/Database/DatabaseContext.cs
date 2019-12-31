@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Linq;
 using Diploma.IndexingService.Core.Objects;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Diploma.IndexingService.Core.Database
 {
-	internal class DatabaseContext : DbContext
+	internal class DatabaseContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 	{
 		public DbSet<ContentStorageDbItem> Items { get; set; }
 

@@ -7,7 +7,7 @@ namespace Diploma.IndexingService.Core.Database
 	{
 		public string Id { get; set; }
 
-		public string UserIdentity { get; set; }
+		public Guid UserIdentity { get; set; }
 
 		public string FileName { get; set; }
 

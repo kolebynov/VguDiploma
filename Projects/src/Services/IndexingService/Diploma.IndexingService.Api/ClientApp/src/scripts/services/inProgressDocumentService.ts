@@ -1,16 +1,12 @@
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
 import { InProgressDocument, GetDocument, InProcessDocumentState, ApiResult } from "@app/models";
 import moment, { Moment } from "moment";
-import axios from "axios";
+import { apiRequestExecutor } from "./apiRequestExecutor";
 
 class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
     private readonly inProgressDocuments = new BehaviorSubject<InProgressDocument[]>([]);
     private readonly lastUpdateStatesTime: Record<string, Moment> = {};
     private isLoaded = false;
-
-    constructor() {
-        this.load();
-    }
 
     public updateState(document: GetDocument, newState: InProcessDocumentState, errorInfo = ""): void {
         const index = this.inProgressDocuments.value.findIndex(x => x.document.id === document.id);
@@ -35,7 +31,7 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
     }
 
     public async remove(documentIds: string[]): Promise<void> {
-        const { data } = await axios.delete<ApiResult<any>>("/api/inProgressDocuments", {
+        const data = await apiRequestExecutor.delete<ApiResult<any>>("/api/inProgressDocuments", {
             data: documentIds
         });
 
@@ -52,6 +48,7 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
     subscribe(next: (value: InProgressDocument[]) => void, error: null, complete: () => void): Unsubscribable;
     subscribe(next?: (value: InProgressDocument[]) => void, error?: (error: any) => void, complete?: () => void): Unsubscribable;
     subscribe(next?: any, error?: any, complete?: any) {
+        this.load();
         return this.inProgressDocuments.subscribe(next, error, complete);
     }
 
@@ -60,9 +57,9 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
             return;
         }
 
-        axios
+        apiRequestExecutor
             .get<ApiResult<InProgressDocument[]>>("/api/inProgressDocuments?limit=1000")
-            .then(({ data: { data } }) => {
+            .then(({ data }) => {
                 this.isLoaded = true;
                 this.inProgressDocuments.next(data);
             })

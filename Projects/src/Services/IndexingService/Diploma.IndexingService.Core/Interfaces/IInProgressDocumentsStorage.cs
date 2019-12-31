@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Core.Objects;
@@ -11,11 +12,13 @@ namespace Diploma.IndexingService.Core.Interfaces
 
 		Task SetErrorState(DocumentInfo document, string errorInfo, CancellationToken cancellationToken);
 
-		Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(string userIdentity, int limit, int skip,
+		Task<IReadOnlyCollection<InProgressDocument>> GetInProgressDocuments(Guid userIdentity, int limit, int skip,
 			CancellationToken cancellationToken);
 
 		Task RemoveInProgressDocuments(
 			IReadOnlyCollection<DocumentIdentity> documentIds,
 			CancellationToken cancellationToken);
+
+		Task RemoveAll(CancellationToken cancellationToken);
 	}
 }

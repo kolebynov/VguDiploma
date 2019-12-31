@@ -1,8 +1,7 @@
 import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments, PaginationApiResult } from "@app/models";
-import axios from "axios";
-import { inProgressDocumentService } from "./inProgressDocumentService";
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
 import { GetFolder } from "@app/models/folder";
+import { apiRequestExecutor } from "./apiRequestExecutor";
 
 export interface AddDocumentModel {
     document: GetDocument;
@@ -57,7 +56,7 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
 
     public async search(searchString: string, limit = 10, skip = 0)
         : Promise<{documents: FoundDocument[], totalCount: number}> {
-        const { data: { data, pagination } } = await axios
+        const { data, pagination } = await apiRequestExecutor
             .get<PaginationApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}&limit=${limit}&skip=${skip}`);
 
         return {
@@ -79,7 +78,7 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
         const formData = new FormData();
         formData.append("files", file);
 
-        const { data: { data: [contentToken] } } = await axios
+        const { data: [contentToken] } = await apiRequestExecutor
             .post<ApiResult<string[]>>("/api/documents/upload", formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -95,7 +94,7 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
                 contentToken: contentToken
             }]
         };
-        const { data: { data: [result] } } = await axios.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, addDocuments);
+        const { data: [result] } = await apiRequestExecutor.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, addDocuments);
         return result;
     }
 }

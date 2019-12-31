@@ -64,5 +64,12 @@ export default new Resources({
         "folder": "Folder",
         "actions": "Actions",
         "remove": "Remove"
+    }),
+    login: new ResourceSet({
+        "userName": "User name or Email",
+        "password": "Password",
+        "login": "Login",
+        "sign_up": "Sign Up",
+        "logout": "Logout"
     })
 });

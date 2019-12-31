@@ -1,11 +1,12 @@
 import * as signalR from "@microsoft/signalr";
 import { InProgressDocument } from "@app/models";
 import { inProgressDocumentService } from "./inProgressDocumentService";
+import { accessTokenStorage } from "@app/utilities/accessTokenStorage";
 
 export const signalrService = {
     start: () => {
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(process.env.SIGNALR_URL)
+            .withUrl(process.env.SIGNALR_URL, { accessTokenFactory: () => accessTokenStorage.get() })
             .withAutomaticReconnect()
             .build();
 

@@ -6,6 +6,7 @@ using Diploma.IndexingService.Core.Database;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Internal;
 using Diploma.IndexingService.Core.Objects;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -29,6 +30,26 @@ namespace Diploma.IndexingService.Core.Extensions
 					sqlOpt => sqlOpt
 						.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName)
 						.EnableRetryOnFailure(10)));
+
+			services.AddIdentity<User, IdentityRole<Guid>>()
+				.AddEntityFrameworkStores<DatabaseContext>()
+				.AddDefaultTokenProviders();
+
+			services.Configure<IdentityOptions>(opt =>
+			{
+				opt.Password.RequireDigit = false;
+				opt.Password.RequireLowercase = false;
+				opt.Password.RequiredLength = 6;
+				opt.Password.RequireNonAlphanumeric = false;
+				opt.Password.RequireUppercase = false;
+				opt.Password.RequiredUniqueChars = 2;
+
+				opt.SignIn.RequireConfirmedEmail = false;
+				opt.SignIn.RequireConfirmedAccount = false;
+				opt.SignIn.RequireConfirmedPhoneNumber = false;
+
+				opt.User.RequireUniqueEmail = true;
+			});
 
 			services.AddSingleton<IDocumentTextExtractor, DocumentTextExtractor>();
 			services.AddSingleton(sp =>

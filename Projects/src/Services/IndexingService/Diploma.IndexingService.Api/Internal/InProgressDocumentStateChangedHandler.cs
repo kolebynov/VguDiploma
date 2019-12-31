@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Diploma.IndexingService.Api.Dto;
 using Diploma.IndexingService.Api.Extensions;
 using Diploma.IndexingService.Core.Events;
 using MediatR;
@@ -21,7 +20,7 @@ namespace Diploma.IndexingService.Api.Internal
 		public Task Handle(InProgressDocumentStateChanged notification, CancellationToken cancellationToken)
 		{
 			var inProgressDocument = notification.InProgressDocument;
-			return hubContext.Clients.User(inProgressDocument.Id.UserIdentity)
+			return hubContext.Clients.User(inProgressDocument.Id.UserIdentity.ToString())
 				.SendAsync(
 					"inProgressDocumentStateChanged",
 					inProgressDocument.ToDto(),

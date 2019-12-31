@@ -73,6 +73,21 @@ namespace Diploma.IndexingService.Api.Extensions
 			};
 		}
 
+		public static GetUserDto ToDto(this User user)
+		{
+			if (user == null)
+			{
+				throw new ArgumentNullException(nameof(user));
+			}
+
+			return new GetUserDto
+			{
+				Id = user.Id,
+				UserName = user.UserName,
+				Email = user.Email
+			};
+		}
+
 		public static string GetClientId(this DocumentIdentity documentIdentity)
 		{
 			if (documentIdentity == null)

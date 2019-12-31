@@ -10,12 +10,14 @@ using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using Diploma.Shared.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Diploma.IndexingService.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class FoldersController : ControllerBase
 	{
 		private readonly IFoldersStorage foldersStorage;

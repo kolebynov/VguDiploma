@@ -1,23 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Api.Internal;
 using Diploma.IndexingService.Core.Configuration;
 using Diploma.IndexingService.Core.Extensions;
 using Diploma.IndexingService.Core.Interfaces;
-using Diploma.IndexingService.Core.Objects;
 using Diploma.IndexingService.EsDocumentStorage.Configuration;
 using Diploma.IndexingService.EsDocumentStorage.Extensions;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Diploma.IndexingService.Api
 {
@@ -35,27 +36,54 @@ namespace Diploma.IndexingService.Api
 		{
 			services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IIndexingQueue).Assembly);
 			services.AddSignalR();
+			services.AddCoreServices();
+			services.AddEsDocumentStorage();
 
-			services.AddMvcCore(opt => opt.EnableEndpointRouting = false)
-				.AddCors()
+			services.AddAuthentication(
+					opt =>
+					{
+						opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+						opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+					})
+				.AddJwtBearer(opt =>
+				{
+					opt.RequireHttpsMetadata = false;
+					opt.TokenValidationParameters = new TokenValidationParameters
+					{
+						ValidIssuer = JwtAuthOptions.Issuer,
+						ValidateAudience = true,
+						ValidAudience = JwtAuthOptions.Audience,
+						ValidateLifetime = true,
+						IssuerSigningKey = JwtAuthOptions.SigningKey,
+						ValidateIssuerSigningKey = true
+					};
+
+					opt.Events = new JwtBearerEvents
+					{
+						OnMessageReceived = context =>
+						{
+							var accessToken = context.Request.Query["access_token"];
+
+							var path = context.HttpContext.Request.Path;
+							if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/signalr"))
+							{
+								context.Token = accessToken;
+							}
+
+							return Task.CompletedTask;
+						}
+					};
+				});
+
+			services.AddMvc(opt => opt.EnableEndpointRouting = false)
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
 			services.AddHostedService<TempContentBackgroundService>();
 
 			services.AddScoped<ITempContentStorage, TempContentStorage>();
+			services.AddScoped<IUserService, UserService>();
 
-			services.AddSingleton(sp =>
-			{
-				var mock = new Mock<IUserService>();
-				mock.Setup(x => x.GetCurrentUser())
-					.ReturnsAsync(new User("123"));
-
-				return mock.Object;
-			});
 			services.AddSingleton<IContentTypeProvider, FileExtensionContentTypeProvider>();
-
-			services.AddCoreServices();
-			services.AddEsDocumentStorage();
 
 			services.Configure<CoreOptions>(Configuration);
 			services.Configure<IndexingQueueOptions>(Configuration.GetSection("indexingQueue"));
@@ -71,25 +99,13 @@ namespace Diploma.IndexingService.Api
 			{
 				app.UseCors(builder => builder.WithOrigins("http://127.0.0.1:7778").AllowAnyMethod().AllowAnyHeader().AllowCredentials());
 				app.UseDeveloperExceptionPage();
-				app.Use((context, next) =>
-				{
-					context.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
-					{
-						new Claim(ClaimTypes.NameIdentifier, "123"),
-						new Claim(ClaimTypes.Name, "Test user"),
-						new Claim(ClaimTypes.Email, "test@example.com"),
-						new Claim(ClaimTypes.Role, "Admin")
-					}));
-
-					return next();
-				});
 			}
 
+			app.UseAuthentication();
 			app.UseStaticFiles();
-
 			app.UseMvc();
-
 			app.UseRouting();
+			app.UseAuthorization();
 			app.UseEndpoints(endPoints =>
 			{
 				endPoints.MapHub<SignalrHub>("/signalr");

@@ -6,20 +6,15 @@ namespace Diploma.IndexingService.Core.Objects
 	{
 		public Guid Id { get; }
 
-		public string UserIdentity { get; }
+		public Guid UserIdentity { get; }
 
-		public FolderIdentity(Guid id, string userIdentity)
+		public FolderIdentity(Guid id, Guid userIdentity)
 		{
-			if (string.IsNullOrEmpty(userIdentity))
-			{
-				throw new ArgumentException("Value cannot be null or empty.", nameof(userIdentity));
-			}
-
 			Id = id;
 			UserIdentity = userIdentity;
 		}
 
-		public override string ToString() => $"{Id:N}_{UserIdentity}";
+		public override string ToString() => $"{Id:N}_{UserIdentity:N}";
 
 		public int CompareTo(FolderIdentity other) => ToString().CompareTo(other?.ToString());
 
@@ -33,7 +28,9 @@ namespace Diploma.IndexingService.Core.Objects
 				throw new FormatException("Input string doesn't have separator");
 			}
 
-			return new FolderIdentity(new Guid(stringId.Substring(0, lastIndex)), stringId.Substring(lastIndex + 1));
+			return new FolderIdentity(new Guid(stringId.Substring(0, lastIndex)), new Guid(stringId.Substring(lastIndex + 1)));
 		}
+
+		public static FolderIdentity RootFolderId(Guid userIdentity) => new FolderIdentity(Guid.Empty, userIdentity);
 	}
 }

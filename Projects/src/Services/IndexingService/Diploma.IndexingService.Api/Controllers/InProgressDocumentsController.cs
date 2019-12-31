@@ -9,12 +9,14 @@ using Diploma.IndexingService.Api.Extensions;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Diploma.IndexingService.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	[Authorize]
 	public class InProgressDocumentsController : ControllerBase
 	{
 		private readonly IInProgressDocumentsStorage inProgressDocumentsStorage;
