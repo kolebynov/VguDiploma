@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.0-buster AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY src/Infrastructure/Diploma.Api.Shared/Diploma.Api.Shared.csproj src/Infrastructure/Diploma.Api.Shared/
 COPY src/Infrastructure/Diploma.Shared/Diploma.Shared.csproj src/Infrastructure/Diploma.Shared/
@@ -17,7 +17,7 @@ RUN npm install
 COPY /src/Services/IndexingService/Diploma.IndexingService.Api/ClientApp/ .
 RUN npm run release
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim AS final
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS final
 WORKDIR /app
 EXPOSE 80
 COPY --from=build /app/publish .
