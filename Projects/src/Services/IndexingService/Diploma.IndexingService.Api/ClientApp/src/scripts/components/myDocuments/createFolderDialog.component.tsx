@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogContentText, TextField, DialogActions, But
 import { resources } from "@app/utilities/resources";
 import { folderService } from "@app/services";
 import { GetFolder } from "@app/models/folder";
+import { useForm } from "react-hook-form";
+import { ValidateTextField } from "../validateTextField/validateTextField.component";
 
 const resourceSet = resources.getResourceSet("folders");
 const commonResources = resources.getResourceSet("common");
@@ -14,43 +16,20 @@ interface CreateFolderDialogProps {
     open: boolean;
 }
 
+type FormData = {
+    folderName: string;
+};
+
 export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = memo(({ currentFolderId, onFolderAdd, onClose, open }) => {
-    const [folderName, setFolderName] = useState("");
-    const [creationError, setCreationError] = useState({
-        isError: false,
-        errorText: ""
-    });
     const [isCreating, setIsCreating] = useState(false);
+    const { register, errors, handleSubmit } = useForm<FormData>();
 
     const handleClose = () => {
-        setFolderName("");
         setIsCreating(false);
-        setCreationError({
-            isError: false,
-            errorText: ""
-        });
         onClose();
     };
 
-    const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFolderName(e.target.value);
-        setCreationError({
-            isError: false,
-            errorText: ""
-        });
-    };
-
-    const onSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-
-        if (folderName.trim().length === 0) {
-            setCreationError({
-                isError: true,
-                errorText: resourceSet.getLocalizableValue("folder_name_empty")
-            })
-            return;
-        }
-
+    const onSubmit = async ({ folderName }: FormData) => {
         setIsCreating(true);
 
         try {
@@ -68,21 +47,19 @@ export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = me
     return (
         <>
             <Dialog open={open} aria-labelledby="form-dialog-title">
-                <form onSubmit={onSubmit} noValidate>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <DialogContent>
                         <DialogContentText>
                             {resourceSet.getLocalizableValue("create_folder_dialog_text")}
                         </DialogContentText>
-                        <TextField
+                        <ValidateTextField
                             autoFocus
                             margin="dense"
-                            id="name"
-                            label={resourceSet.getLocalizableValue("folder_name")}
+                            name="folderName"
                             fullWidth
-                            value={folderName}
-                            onChange={onInputChange}
-                            error={creationError.isError}
-                            helperText={creationError.errorText}
+                            inputRef={register({ required: true, maxLength: 100 })}
+                            errors={errors}
+                            resourceSet={resourceSet}
                         />
                     </DialogContent>
                     <DialogActions>

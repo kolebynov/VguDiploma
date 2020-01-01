@@ -4,6 +4,9 @@ import { resources } from "@app/utilities/resources";
 import { userService } from "@app/services/userService";
 import { useHistory } from "react-router";
 import { createLinkComponent } from "@app/utilities/reactUtils";
+import { useForm } from 'react-hook-form'
+import { getErrorMessage } from "@app/utilities/formUtils";
+import { ValidateTextField } from "@app/components/validateTextField/validateTextField.component";
 
 const resourceSet = resources.getResourceSet("login");
 const useStyles = makeStyles(theme => createStyles({
@@ -17,7 +20,9 @@ const useStyles = makeStyles(theme => createStyles({
         height: "100vh"
     },
     paper: {
-        padding: theme.spacing(6)
+        padding: theme.spacing(6),
+        width: "20%",
+        minWidth: "200px"
     },
     actions: {
         display: "flex",
@@ -25,41 +30,45 @@ const useStyles = makeStyles(theme => createStyles({
     }
 }));
 
+type FormData = {
+    userNameOrEmail: string;
+    password: string;
+}
+
 export const LoginPage: FunctionComponent = memo(() => {
     const styles = useStyles({});
-    const [userName, setUserName] = useState("");
-    const [password, setPassword] = useState("");
     const history = useHistory();
-
-    const onSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-
-        await userService.login(userName, password);
+    const { register, handleSubmit, errors } = useForm<FormData>();
+    console.log(errors);
+    const onSubmit = async ({ userNameOrEmail, password }: FormData) => {
+        await userService.login(userNameOrEmail, password);
         history.push("/");
     };
 
     return (
         <div className={styles.root}>
             <Paper className={styles.paper} elevation={3}>
-                <form onSubmit={onSubmit}>
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <div className={styles.formInput}>
-                        <TextField
-                            label={resourceSet.getLocalizableValue("userNameOrEmail")}
-                            required
+                        <ValidateTextField
+                            name="userNameOrEmail"
                             variant="outlined"
-                            value={userName}
-                            onChange={e => setUserName(e.target.value)}
+                            fullWidth
+                            inputRef={register({ required: true, maxLength: 50 })}
+                            errors={errors}
+                            resourceSet={resourceSet}
                         />
                     </div>
                     <div className={styles.formInput}>
-                        <TextField
-                            label={resourceSet.getLocalizableValue("password")}
+                        <ValidateTextField
+                            name="password"
                             type="password"
                             autoComplete="current-password"
-                            required
                             variant="outlined"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
+                            inputRef={register({ required: true, minLength: 6, maxLength: 32 })}
+                            fullWidth
+                            errors={errors}
+                            resourceSet={resourceSet}
                         />
                     </div>
                     <div className={styles.actions}>

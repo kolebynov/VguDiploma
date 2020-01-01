@@ -50,7 +50,9 @@ export default new Resources({
     }),
     folders: new ResourceSet({
         "add_folder": "Add new folder",
-        "folder_name": "Folder name",
+        "folderName": "Folder name",
+        "folderName_required": "Folder name can't be empty",
+        "folderName_maxLength": "Folder name can't be longer that 100 characters",
         "create_folder_dialog_text": "To create folder enter a name",
         "folder_name_empty": "Folder name is empty",
         "remove_items_dialog": "Do you really want to remove this item?",
@@ -72,6 +74,16 @@ export default new Resources({
         "sign_up": "Sign Up",
         "logout": "Logout",
         "userName": "User name",
-        "email": "Email"
+        "email": "Email",
+        "userName_required": "User name can't be empty",
+        "userName_maxLength": "User name can't be longer than 50 characters",
+        "userNameOrEmail_required": "User name or email can't be empty",
+        "userNameOrEmail_maxLength": "User name or email can't be longer than 50 characters",
+        "password_required": "Password can't be empty",
+        "password_minLength": "Password can't be shorter than 6 characters",
+        "password_maxLength": "Password can't be longer than 32 characters",
+        "email_required": "Email can't be empty",
+        "email_maxLength": "Email can't be longer than 50 characters",
+        "email_pattern": "Email is not valid"
     })
 });
