@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
-using System.Security.Claims;
+﻿using System.Reflection;
 using System.Threading.Tasks;
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Interfaces;

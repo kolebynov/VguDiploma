@@ -21,28 +21,31 @@ namespace Diploma.IndexingService.Core.Internal
 
 		public async Task<IReadOnlyCollection<Folder>> GetFolders(FolderIdentity parentFolderId, int limit, int skip,
 			CancellationToken cancellationToken) =>
-			await context.Folders
-				.Where(x => x.ParentId == parentFolderId)
+			(await context.Folders
+				.Where(x => x.ParentId == parentFolderId.Id && x.UserIdentity == parentFolderId.UserIdentity)
 				.OrderBy(x => x.Name)
 				.Skip(skip)
 				.Take(limit)
-				.ToArrayAsync(cancellationToken);
+				.ToArrayAsync(cancellationToken))
+				.Select(ToModel)
+				.ToArray();
 
 		public async Task<Folder> GetFolder(FolderIdentity folderId, CancellationToken cancellationToken) => 
-			await context.Folders.FindAsync(new object[] { folderId }, cancellationToken);
+			ToModel(await context.Folders.FindAsync(new object[] { folderId.Id, folderId.UserIdentity }, cancellationToken));
 
 		public Task<int> GetFoldersCount(FolderIdentity parentFolderId, CancellationToken cancellationToken) => 
-			context.Folders.CountAsync(x => x.ParentId == parentFolderId, cancellationToken);
+			context.Folders.CountAsync(x => x.ParentId == parentFolderId.Id && x.UserIdentity == parentFolderId.UserIdentity, cancellationToken);
 
 		public async Task<Folder> AddFolder(Folder folder, CancellationToken cancellationToken)
 		{
-			if (await context.Folders.AnyAsync(x => x.Name == folder.Name && x.ParentId == folder.ParentId,
+			var parentFolderId = folder.ParentId?.Id;
+			if (await context.Folders.AnyAsync(x => x.Name == folder.Name && x.ParentId == parentFolderId && x.UserIdentity == folder.Id.UserIdentity,
 				cancellationToken))
 			{
 				throw new InvalidOperationException($"Folder with name {folder.Name} already exists in this folder");
 			}
 
-			context.Folders.Add(folder);
+			context.Folders.Add(ToDbItem(folder));
 			await context.SaveChangesAsync(cancellationToken);
 
 			return folder;
@@ -54,23 +57,24 @@ namespace Diploma.IndexingService.Core.Internal
 			{
 				foreach (var folderId in folderIds)
 				{
-					await RemoveFolder(await GetFolder(folderId, cancellationToken), cancellationToken);
+					await RemoveFolder(await context.Folders.FindAsync(
+						new object[] { folderId.Id, folderId.UserIdentity }, cancellationToken), cancellationToken);
 				}
 
 				await context.SaveChangesAsync(cancellationToken);
 			});
 		}
 
-		private async Task RemoveFolder(Folder folder, CancellationToken cancellationToken)
+		private async Task RemoveFolder(FolderDbItem folder, CancellationToken cancellationToken)
 		{
-			List<Folder> subFolders;
+			List<FolderDbItem> subFolders;
 			int skip = 0;
 			int limit = 1000;
 
 			do
 			{
 				subFolders = await context.Folders
-					.Where(x => x.ParentId == folder.Id)
+					.Where(x => x.ParentId == folder.Id && x.UserIdentity == folder.UserIdentity)
 					.Take(limit)
 					.Skip(skip)
 					.ToListAsync(cancellationToken);
@@ -85,5 +89,20 @@ namespace Diploma.IndexingService.Core.Internal
 
 			context.Folders.Remove(folder);
 		}
+
+		private static FolderDbItem ToDbItem(Folder folder) => new FolderDbItem
+		{
+			Id = folder.Id.Id,
+			UserIdentity = folder.Id.UserIdentity,
+			ParentId = folder.ParentId?.Id,
+			Name = folder.Name,
+			ParentsPath = string.Join(",", folder.ParentsPath?.Select(y => y.Id.ToString()) ?? Enumerable.Empty<string>())
+		};
+
+		private static Folder ToModel(FolderDbItem dbItem) => new Folder(
+			new FolderIdentity(dbItem.Id, dbItem.UserIdentity),
+			dbItem.Name,
+			dbItem.ParentId != null? new FolderIdentity(dbItem.ParentId.Value, dbItem.UserIdentity) : null,
+			dbItem.ParentsPath.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => new FolderIdentity(new Guid(x), dbItem.UserIdentity)).ToList());
 	}
 }

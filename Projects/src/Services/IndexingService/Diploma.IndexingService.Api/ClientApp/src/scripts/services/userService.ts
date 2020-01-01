@@ -1,4 +1,4 @@
-import { GetUser } from "@app/models/User";
+import { GetUser, RegisterData } from "@app/models/User";
 import { apiRequestExecutor } from "./apiRequestExecutor";
 import { ApiResult } from "@app/models";
 import { accessTokenStorage } from "@app/utilities/accessTokenStorage";
@@ -10,14 +10,13 @@ interface LoginResponse {
 
 class UserService {
     private user: GetUser = null;
-    private lastFailed = false;
 
     public async isLogin(): Promise<boolean> {
         if (this.user) {
             return true;
         }
 
-        if (this.lastFailed) {
+        if (!accessTokenStorage.get()) {
             return false;
         }
 
@@ -35,13 +34,10 @@ class UserService {
             return;
         }
 
-        await this.executeUserRequest(async () => {
-            const { data: { user, accessToken } } =await apiRequestExecutor.post<ApiResult<LoginResponse>>("/api/users/login", {
-                userName, password
-            });
-            this.user = user;
-            accessTokenStorage.save(accessToken)
-        });
+        const { data: { user, accessToken } } = await apiRequestExecutor.post<ApiResult<LoginResponse>>(
+            "/api/users/login", { userName, password });
+        this.user = user;
+        accessTokenStorage.save(accessToken);
     }
 
     public async getCurrentUser(): Promise<GetUser> {
@@ -49,10 +45,8 @@ class UserService {
             return this.user;
         }
 
-        return await this.executeUserRequest(async () => {
-            this.user = (await apiRequestExecutor.get<ApiResult<GetUser>>("/api/users/currentUser")).data;
-            return this.user;
-        });
+        this.user = (await apiRequestExecutor.get<ApiResult<GetUser>>("/api/users/currentUser")).data;
+        return this.user;
     }
 
     public logout() {
@@ -60,16 +54,8 @@ class UserService {
         location.reload();
     }
 
-    private async executeUserRequest<T>(requestFunc: () => Promise<T>): Promise<T> {
-        try {
-            const response = await requestFunc();
-            this.lastFailed = false;
-            return response;
-        }
-        catch (e) {
-            this.lastFailed = true;
-            throw e;
-        }
+    public register(registerData: RegisterData): Promise<void> {
+        return apiRequestExecutor.post("/api/users/register", registerData);
     }
 }
 

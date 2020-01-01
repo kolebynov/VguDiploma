@@ -41,6 +41,28 @@ namespace Diploma.IndexingService.Core.Migrations
                     b.ToTable("Items");
                 });
 
+            modelBuilder.Entity("Diploma.IndexingService.Core.Database.FolderDbItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserIdentity")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParentsPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id", "UserIdentity");
+
+                    b.ToTable("Folders");
+                });
+
             modelBuilder.Entity("Diploma.IndexingService.Core.Database.InProgressDocumentDbItem", b =>
                 {
                     b.Property<string>("Id")
@@ -64,25 +86,6 @@ namespace Diploma.IndexingService.Core.Migrations
                     b.HasKey("Id", "UserIdentity");
 
                     b.ToTable("InProgressDocuments");
-                });
-
-            modelBuilder.Entity("Diploma.IndexingService.Core.Objects.Folder", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentsPath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("Diploma.IndexingService.Core.Objects.User", b =>

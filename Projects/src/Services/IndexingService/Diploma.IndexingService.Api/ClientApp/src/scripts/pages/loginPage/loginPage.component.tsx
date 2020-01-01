@@ -3,6 +3,7 @@ import { Paper, TextField, Button, makeStyles, createStyles } from "@material-ui
 import { resources } from "@app/utilities/resources";
 import { userService } from "@app/services/userService";
 import { useHistory } from "react-router";
+import { createLinkComponent } from "@app/utilities/reactUtils";
 
 const resourceSet = resources.getResourceSet("login");
 const useStyles = makeStyles(theme => createStyles({
@@ -17,6 +18,10 @@ const useStyles = makeStyles(theme => createStyles({
     },
     paper: {
         padding: theme.spacing(6)
+    },
+    actions: {
+        display: "flex",
+        justifyContent: "space-between"
     }
 }));
 
@@ -39,7 +44,7 @@ export const LoginPage: FunctionComponent = memo(() => {
                 <form onSubmit={onSubmit}>
                     <div className={styles.formInput}>
                         <TextField
-                            label={resourceSet.getLocalizableValue("userName")}
+                            label={resourceSet.getLocalizableValue("userNameOrEmail")}
                             required
                             variant="outlined"
                             value={userName}
@@ -57,13 +62,16 @@ export const LoginPage: FunctionComponent = memo(() => {
                             onChange={e => setPassword(e.target.value)}
                         />
                     </div>
-                    <div>
+                    <div className={styles.actions}>
                         <Button
                             type="submit"
                             color="primary"
                             variant="contained"
                         >
                             {resourceSet.getLocalizableValue("login")}
+                        </Button>
+                        <Button component={createLinkComponent("/register")}>
+                            {resourceSet.getLocalizableValue("sign_up")}
                         </Button>
                     </div>
                 </form>

@@ -66,10 +66,12 @@ export default new Resources({
         "remove": "Remove"
     }),
     login: new ResourceSet({
-        "userName": "User name or Email",
+        "userNameOrEmail": "User name or Email",
         "password": "Password",
         "login": "Login",
         "sign_up": "Sign Up",
-        "logout": "Logout"
+        "logout": "Logout",
+        "userName": "User name",
+        "email": "Email"
     })
 });

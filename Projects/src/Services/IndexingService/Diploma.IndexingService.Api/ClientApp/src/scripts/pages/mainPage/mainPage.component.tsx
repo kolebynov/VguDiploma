@@ -7,6 +7,7 @@ import { MyDocumentsPage, SearchPage } from "..";
 import { GetUser } from "@app/models/User";
 import { userService } from "@app/services/userService";
 import AccountCircle from '@material-ui/icons/AccountCircle';
+import { createLinkComponent } from "@app/utilities/reactUtils";
 
 const useStyles = makeStyles((theme) =>
     createStyles({
@@ -70,13 +71,9 @@ export const MainPage: FunctionComponent = memo(() => {
             .then(setCurrentUser);
     }, []);
 
-    const searchLink = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
-        (props, ref) => <Link innerRef={ref} to="/" {...props} />,
-    );
-
-    const myDocumentsLink = React.forwardRef<HTMLAnchorElement, Omit<LinkProps, 'innerRef' | 'to'>>(
-        (props, ref) => <Link innerRef={ref} to="/myDocuments" {...props} />,
-    );
+    const searchLink = createLinkComponent("/");
+    const myDocumentsLink = createLinkComponent("/myDocuments");
+    
     return (
         <>
             <div className={classes.root}>

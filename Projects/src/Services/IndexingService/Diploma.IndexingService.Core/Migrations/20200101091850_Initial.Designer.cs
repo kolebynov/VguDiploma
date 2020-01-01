@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Diploma.IndexingService.Core.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20191231144845_Initial")]
+    [Migration("20200101091850_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,28 @@ namespace Diploma.IndexingService.Core.Migrations
                     b.ToTable("Items");
                 });
 
+            modelBuilder.Entity("Diploma.IndexingService.Core.Database.FolderDbItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserIdentity")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ParentsPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id", "UserIdentity");
+
+                    b.ToTable("Folders");
+                });
+
             modelBuilder.Entity("Diploma.IndexingService.Core.Database.InProgressDocumentDbItem", b =>
                 {
                     b.Property<string>("Id")
@@ -66,25 +88,6 @@ namespace Diploma.IndexingService.Core.Migrations
                     b.HasKey("Id", "UserIdentity");
 
                     b.ToTable("InProgressDocuments");
-                });
-
-            modelBuilder.Entity("Diploma.IndexingService.Core.Objects.Folder", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ParentsPath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Folders");
                 });
 
             modelBuilder.Entity("Diploma.IndexingService.Core.Objects.User", b =>

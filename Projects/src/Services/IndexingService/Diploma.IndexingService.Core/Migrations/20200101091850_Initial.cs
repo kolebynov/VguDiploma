@@ -50,14 +50,15 @@ namespace Diploma.IndexingService.Core.Migrations
                 name: "Folders",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<Guid>(nullable: false),
+                    UserIdentity = table.Column<Guid>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    ParentId = table.Column<string>(nullable: true),
+                    ParentId = table.Column<Guid>(nullable: true),
                     ParentsPath = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Folders", x => x.Id);
+                    table.PrimaryKey("PK_Folders", x => new { x.Id, x.UserIdentity });
                 });
 
             migrationBuilder.CreateTable(

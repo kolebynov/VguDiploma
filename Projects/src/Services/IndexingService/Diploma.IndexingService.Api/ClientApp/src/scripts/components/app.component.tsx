@@ -6,6 +6,7 @@ import { LoginPage } from '@app/pages/loginPage/loginPage.component';
 import { Loader } from './loader/loader.component';
 import { MainPage } from '@app/pages/mainPage/mainPage.component';
 import { userService } from '@app/services/userService';
+import { RegisterPage } from '@app/pages/registerPage/registerPage.component';
 
 signalrService.start();
 
@@ -35,6 +36,7 @@ const App: FunctionComponent = memo(() => {
       <Suspense fallback={<Loader />}>
         <Switch>
           <Route path={"/login"} component={LoginPage} />
+          <Route path={"/register"} component={RegisterPage} />
           <Route path={"*"} component={loginWrapped(MainPage)} />
         </Switch>
       </Suspense>
