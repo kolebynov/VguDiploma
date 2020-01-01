@@ -5,7 +5,7 @@ import { GetFolder, GetFolderItem } from "@app/models/folder";
 import { CreateFolderDialog } from "./createFolderDialog.component";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { getIdForDocument, getModificationDateForDocument } from "@app/utilities";
-import { documentService, UploadingDocument } from "@app/services";
+import { documentService, UploadingDocument, UploadingState } from "@app/services";
 import { format } from "@app/utilities/stringUtils";
 import SettingsIcon from '@material-ui/icons/Settings';
 import { ButtonProps } from "@material-ui/core/Button";
@@ -31,15 +31,19 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 }));
 
 interface UploadingItemsInfoProps {
-    count: number;
+    uploadingDocuments: UploadingDocument[];
 }
 
-const UploadingItemsInfo: FunctionComponent<UploadingItemsInfoProps> = memo(({ count }) => {
+const UploadingItemsInfo: FunctionComponent<UploadingItemsInfoProps> = memo(({ uploadingDocuments }) => {
     const styles = useStyles({});
+    const count = uploadingDocuments
+        .reduce((counter, d) => d.state !== UploadingState.Error ? counter + 1 : counter, 0);
+    const failedCount = uploadingDocuments
+        .reduce((counter, d) => d.state === UploadingState.Error ? counter + 1 : counter, 0);
 
     return (
         <>
-            {count > 0
+            {count > 0 || failedCount > 0
                 ? <span className={styles.uploadInfo}>
                     <CircularProgress size={20} />
                     <Typography
@@ -48,7 +52,9 @@ const UploadingItemsInfo: FunctionComponent<UploadingItemsInfoProps> = memo(({ c
                         color="textSecondary"
                         className={styles.uploadInfoText}
                     >
-                        {format(uploadResources.getLocalizableValue("upload_files_info_format"), count)}
+                        {failedCount == 0
+                            ? format(uploadResources.getLocalizableValue("upload_files_info_format"), count)
+                            : format(uploadResources.getLocalizableValue("upload_files_info_with_error_format"), count, failedCount)}
                     </Typography>
                 </span>
                 : null}
@@ -166,7 +172,7 @@ export const FolderItemsToolbar: FunctionComponent<FolderItemsToolbarProps> = me
                 >
                     {commonResources.getLocalizableValue("actions")}
                 </ToolbarButton>
-                <UploadingItemsInfo count={uploadingDocuments.length} />
+                <UploadingItemsInfo uploadingDocuments={uploadingDocuments} />
                 <ToolbarMenu anchorEl={addMenuAnchorEl} onClose={() => setAddMenuAnchorEl(null)}>
                     <MenuItem onClick={handleAddFolder}>{commonResources.getLocalizableValue("folder")}</MenuItem>
                     <MenuItem onClick={handleAddFile}>{commonResources.getLocalizableValue("file")}</MenuItem>

@@ -54,8 +54,8 @@ class UserService {
         location.reload();
     }
 
-    public register(registerData: RegisterData): Promise<void> {
-        return apiRequestExecutor.post("/api/users/register", registerData);
+    public async register(registerData: RegisterData): Promise<void> {
+        await apiRequestExecutor.post("/api/users/register", registerData);
     }
 }
 

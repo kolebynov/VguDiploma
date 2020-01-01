@@ -1,7 +1,7 @@
 import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments, PaginationApiResult } from "@app/models";
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
 import { GetFolder } from "@app/models/folder";
-import { apiRequestExecutor } from "./apiRequestExecutor";
+import { apiRequestExecutor, ApiRequestError } from "./apiRequestExecutor";
 
 export interface AddDocumentModel {
     document: GetDocument;
@@ -18,6 +18,7 @@ export interface UploadingDocument {
     state: UploadingState;
     document: GetDocument;
     folder: GetFolder;
+    error?: string;
 }
 
 class DocumentService implements Subscribable<UploadingDocument[]> {
@@ -34,17 +35,17 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
 
         const results: AddDocumentResult[] = [];
         for (const document of documents) {
-            const index = this.uploadingDocuments.value
-                .findIndex(x => x.document.id === document.document.id && x.folder.id === folder.id);
-            this.uploadingDocuments.value[index] = {
-                state: UploadingState.Uploading,
-                ...this.uploadingDocuments.value[index]
-            }
+            this.updateState(document.document.id, folder.id, UploadingState.Uploading);
+
+            try {
             const result = await this.addDocument(document, folder.id);
             results.push(result);
-
             this.uploadingDocuments.next(this.uploadingDocuments.value
                 .filter(x => !(x.document.id === document.document.id && x.folder.id === folder.id)));
+            }
+            catch (e) {
+                this.updateState(document.document.id, folder.id, UploadingState.Error, e.message);
+            }
         }
 
         return results;
@@ -55,7 +56,7 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
     }
 
     public async search(searchString: string, limit = 10, skip = 0)
-        : Promise<{documents: FoundDocument[], totalCount: number}> {
+        : Promise<{ documents: FoundDocument[], totalCount: number }> {
         const { data, pagination } = await apiRequestExecutor
             .get<PaginationApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}&limit=${limit}&skip=${skip}`);
 
@@ -96,6 +97,18 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
         };
         const { data: [result] } = await apiRequestExecutor.post<ApiResult<AddDocumentResult[]>>(`/api/documents`, addDocuments);
         return result;
+    }
+
+    private updateState(docId: string, folderId: string, newState: UploadingState, error?: string) {
+        const index = this.uploadingDocuments.value
+            .findIndex(x => x.document.id === docId && x.folder.id === folderId);
+        this.uploadingDocuments.value[index] = {
+            ...this.uploadingDocuments.value[index],
+            state: newState,
+            error
+        }
+        
+        this.uploadingDocuments.next([...this.uploadingDocuments.value]);
     }
 }
 

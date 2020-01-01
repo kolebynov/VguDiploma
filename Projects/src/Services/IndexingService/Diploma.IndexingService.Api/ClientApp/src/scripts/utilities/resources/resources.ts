@@ -25,7 +25,8 @@ export default new Resources({
         "found_text": "Text: "
     }),
     uploadDocuments: new ResourceSet({
-        "upload_files_info_format": "Uploading {0} files"
+        "upload_files_info_format": "Uploading {0} files",
+        "upload_files_info_with_error_format": "Uploading {0} files, {1} failed"
     }),
     documentInfo: new ResourceSet({
         "file_name": "File Name",

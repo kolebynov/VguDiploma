@@ -1,5 +1,5 @@
 import React, { memo, FunctionComponent, useState, FormEvent } from "react";
-import { Dialog, DialogContent, DialogContentText, TextField, DialogActions, Button, Backdrop } from "@material-ui/core";
+import { Dialog, DialogContent, DialogContentText, TextField, DialogActions, Button, Backdrop, Typography } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { folderService } from "@app/services";
 import { GetFolder } from "@app/models/folder";
@@ -23,9 +23,11 @@ type FormData = {
 export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = memo(({ currentFolderId, onFolderAdd, onClose, open }) => {
     const [isCreating, setIsCreating] = useState(false);
     const { register, errors, handleSubmit } = useForm<FormData>();
+    const [creatingError, setCreatingError] = useState("");
 
     const handleClose = () => {
         setIsCreating(false);
+        setCreatingError("");
         onClose();
     };
 
@@ -38,9 +40,13 @@ export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = me
                 parentId: currentFolderId
             });
             onFolderAdd(newFolder);
+            handleClose();
+        }
+        catch (e) {
+            setCreatingError(e.message);
         }
         finally {
-            handleClose();
+            setIsCreating(false);
         }
     };
 
@@ -61,6 +67,13 @@ export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = me
                             errors={errors}
                             resourceSet={resourceSet}
                         />
+                        {creatingError
+                            ? <div>
+                                <Typography color="error">
+                                    {creatingError}
+                                </Typography>
+                            </div>
+                            : null}
                     </DialogContent>
                     <DialogActions>
                         <Button type="submit" color="primary">

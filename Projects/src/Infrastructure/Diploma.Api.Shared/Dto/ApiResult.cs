@@ -10,7 +10,7 @@ namespace Diploma.Api.Shared.Dto
 		public bool Success { get; set; }
 
 		[DataMember(EmitDefaultValue = false)]
-		public ApiError Error { get; set; }
+		public ApiError[] Errors { get; set; }
 
 		public static ApiResult SuccessResult { get; } = new ApiResult
 		{
@@ -20,7 +20,7 @@ namespace Diploma.Api.Shared.Dto
 		public static ApiResult ErrorResult(string errorMessage) => new ApiResult
 		{
 			Success = false,
-			Error = new ApiError { Message = errorMessage }
+			Errors = new [] { new ApiError { Message = errorMessage } }
 		};
 
 		public static ApiResult<TData> SuccessResultWithData<TData>(TData data) =>

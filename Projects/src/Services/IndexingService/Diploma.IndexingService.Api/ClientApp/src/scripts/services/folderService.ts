@@ -28,8 +28,8 @@ class FolderService {
         return data;
     }
 
-    public removeItems(itemsToRemove: GetFolderItem[]): Promise<void> {
-        return apiRequestExecutor.delete("/api/folders/items", {
+    public async removeItems(itemsToRemove: GetFolderItem[]): Promise<void> {
+        await apiRequestExecutor.delete("/api/folders/items", {
             data: itemsToRemove
         });
     }

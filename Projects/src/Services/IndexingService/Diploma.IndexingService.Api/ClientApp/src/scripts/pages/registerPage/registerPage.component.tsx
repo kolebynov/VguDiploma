@@ -52,7 +52,7 @@ export const RegisterPage: FunctionComponent = memo(() => {
     return (
         <div className={styles.root}>
             <Paper elevation={3} className={styles.paper}>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     <div className={styles.formInput}>
                         <ValidateTextField
                             name="userName"

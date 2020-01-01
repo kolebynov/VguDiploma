@@ -4,7 +4,7 @@ interface ApiError {
 
 interface ApiResult<TData> {
     success: boolean;
-    error?: ApiError;
+    errors?: ApiError[];
     data?: TData;
 }
 

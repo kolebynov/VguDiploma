@@ -73,7 +73,11 @@ namespace Diploma.IndexingService.Api
 					};
 				});
 
-			services.AddMvc(opt => opt.EnableEndpointRouting = false)
+			services.AddMvc(opt =>
+				{
+					opt.EnableEndpointRouting = false;
+					opt.Filters.Add(new ApiExceptionFilterAttribute());
+				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
 			services.AddHostedService<TempContentBackgroundService>();

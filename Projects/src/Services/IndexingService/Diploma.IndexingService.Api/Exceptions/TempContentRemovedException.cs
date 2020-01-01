@@ -2,7 +2,7 @@
 
 namespace Diploma.IndexingService.Api.Exceptions
 {
-	public class TempContentRemovedException : Exception
+	public class TempContentRemovedException : ApiServiceException
 	{
 		public TempContentRemovedException()
 		{

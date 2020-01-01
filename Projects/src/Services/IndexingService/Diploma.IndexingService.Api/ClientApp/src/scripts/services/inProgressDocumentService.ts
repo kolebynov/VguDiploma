@@ -36,7 +36,7 @@ class InProgressDocumentService implements Subscribable<InProgressDocument[]> {
         });
 
         if (!data.success) {
-            throw new Error(data.error.message);
+            throw new Error(data.errors[0].message);
         }
 
         this.inProgressDocuments.next(this.inProgressDocuments.value.filter(x => !documentIds.includes(x.document.id)));

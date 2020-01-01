@@ -1,12 +1,12 @@
-import React, { FunctionComponent, memo, FormEvent, useState } from "react";
-import { Paper, TextField, Button, makeStyles, createStyles } from "@material-ui/core";
+import React, { FunctionComponent, memo, useState } from "react";
+import { Paper, Button, makeStyles, createStyles, Typography } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { userService } from "@app/services/userService";
 import { useHistory } from "react-router";
 import { createLinkComponent } from "@app/utilities/reactUtils";
 import { useForm } from 'react-hook-form'
-import { getErrorMessage } from "@app/utilities/formUtils";
 import { ValidateTextField } from "@app/components/validateTextField/validateTextField.component";
+import { ApiRequestError } from "@app/services/apiRequestExecutor";
 
 const resourceSet = resources.getResourceSet("login");
 const useStyles = makeStyles(theme => createStyles({
@@ -39,10 +39,16 @@ export const LoginPage: FunctionComponent = memo(() => {
     const styles = useStyles({});
     const history = useHistory();
     const { register, handleSubmit, errors } = useForm<FormData>();
-    console.log(errors);
+    const [apiError, setApiError] = useState<ApiRequestError>(null);
+
     const onSubmit = async ({ userNameOrEmail, password }: FormData) => {
-        await userService.login(userNameOrEmail, password);
-        history.push("/");
+        try {
+            await userService.login(userNameOrEmail, password);
+            history.push("/");
+        }
+        catch (e) {
+            setApiError(e as ApiRequestError);
+        }
     };
 
     return (
@@ -71,6 +77,13 @@ export const LoginPage: FunctionComponent = memo(() => {
                             resourceSet={resourceSet}
                         />
                     </div>
+                    {apiError
+                        ? <div>
+                            <Typography color="error">
+                                {apiError.message}
+                            </Typography>
+                        </div>
+                        : null}
                     <div className={styles.actions}>
                         <Button
                             type="submit"
