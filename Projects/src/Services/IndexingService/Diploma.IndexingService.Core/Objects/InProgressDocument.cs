@@ -17,11 +17,6 @@ namespace Diploma.IndexingService.Core.Objects
 		public InProgressDocument(DocumentIdentity id, string fileName, InProcessDocumentState state,
 			DateTimeOffset lastStatusUpdateTime, string errorInfo = null)
 		{
-			if (string.IsNullOrEmpty(errorInfo) && state == InProcessDocumentState.Error)
-			{
-				throw new ArgumentException($"Error info can't be empty if state is {state}", nameof(errorInfo));
-			}
-
 			Id = id ?? throw new ArgumentNullException(nameof(id));
 			FileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
 			State = state;
