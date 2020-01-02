@@ -34,8 +34,10 @@ export default new Resources({
         "download_file": "Download"
     }),
     app: new ResourceSet({
-        "my_documents_link": "My Documents",
-        "search_link": "Search"
+        "my_documents_link": "My documents",
+        "search_link": "Search",
+        "in_progress": "In-progress documents",
+        "profile": "My profile"
     }),
     locale: new ResourceSet({
         "locale": "en"
