@@ -3,10 +3,11 @@ import { Paper, Button, makeStyles, createStyles, Typography } from "@material-u
 import { resources } from "@app/utilities/resources";
 import { userService } from "@app/services/userService";
 import { useHistory } from "react-router";
-import { createLinkComponent } from "@app/utilities/reactUtils";
+import { createLinkComponent, usePromise } from "@app/utilities/reactUtils";
 import { useForm } from 'react-hook-form'
 import { ValidateTextField } from "@app/components/validateTextField/validateTextField.component";
 import { ApiRequestError } from "@app/services/apiRequestExecutor";
+import { CircularBackdrop } from "@app/components/circularBackdrop/circularBackdrop.component";
 
 const resourceSet = resources.getResourceSet("login");
 const useStyles = makeStyles(theme => createStyles({
@@ -40,10 +41,11 @@ export const LoginPage: FunctionComponent = memo(() => {
     const history = useHistory();
     const { register, handleSubmit, errors } = useForm<FormData>();
     const [apiError, setApiError] = useState<ApiRequestError>(null);
+    const { isPermorming, execute } = usePromise();
 
     const onSubmit = async ({ userNameOrEmail, password }: FormData) => {
         try {
-            await userService.login(userNameOrEmail, password);
+            await execute(() => userService.login(userNameOrEmail, password));
             history.push("/");
         }
         catch (e) {
@@ -53,6 +55,7 @@ export const LoginPage: FunctionComponent = memo(() => {
 
     return (
         <div className={styles.root}>
+            <CircularBackdrop open={isPermorming} />
             <Paper className={styles.paper} elevation={3}>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className={styles.formInput}>

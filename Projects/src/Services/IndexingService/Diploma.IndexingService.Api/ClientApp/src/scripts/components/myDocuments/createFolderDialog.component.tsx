@@ -5,6 +5,8 @@ import { folderService } from "@app/services";
 import { GetFolder } from "@app/models/folder";
 import { useForm } from "react-hook-form";
 import { ValidateTextField } from "../validateTextField/validateTextField.component";
+import { CircularBackdrop } from "../circularBackdrop/circularBackdrop.component";
+import { usePromise } from "@app/utilities/reactUtils";
 
 const resourceSet = resources.getResourceSet("folders");
 const commonResources = resources.getResourceSet("common");
@@ -21,32 +23,26 @@ type FormData = {
 };
 
 export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = memo(({ currentFolderId, onFolderAdd, onClose, open }) => {
-    const [isCreating, setIsCreating] = useState(false);
     const { register, errors, handleSubmit } = useForm<FormData>();
     const [creatingError, setCreatingError] = useState("");
+    const { isPermorming, execute } = usePromise();
 
     const handleClose = () => {
-        setIsCreating(false);
         setCreatingError("");
         onClose();
     };
 
     const onSubmit = async ({ folderName }: FormData) => {
-        setIsCreating(true);
-
         try {
-            const newFolder = await folderService.addFolder({
+            const newFolder = await execute(() => folderService.addFolder({
                 name: folderName,
                 parentId: currentFolderId
-            });
+            }));
             onFolderAdd(newFolder);
             handleClose();
         }
         catch (e) {
             setCreatingError(e.message);
-        }
-        finally {
-            setIsCreating(false);
         }
     };
 
@@ -85,7 +81,7 @@ export const CreateFolderDialog: FunctionComponent<CreateFolderDialogProps> = me
                     </DialogActions>
                 </form>
             </Dialog>
-            <Backdrop open={isCreating && open} style={{ zIndex: 9999 }} />
+            <CircularBackdrop open={isPermorming && open} />
         </>
     );
 });

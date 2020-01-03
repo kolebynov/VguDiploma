@@ -3,6 +3,8 @@ import { Dialog, DialogContent, DialogContentText, DialogActions, Button, Backdr
 import { GetFolderItem } from "@app/models/folder";
 import { resources } from "@app/utilities/resources";
 import { folderService } from "@app/services";
+import { CircularBackdrop } from "../circularBackdrop/circularBackdrop.component";
+import { usePromise, promiseTimeout } from "@app/utilities/reactUtils";
 
 const resourceSet = resources.getResourceSet("folders");
 const commonResources = resources.getResourceSet("common");
@@ -16,16 +18,17 @@ export interface RemoveItemDialogProps {
 
 export const RemoveItemDialog: FunctionComponent<RemoveItemDialogProps> = memo(
     ({ onItemsRemoved, itemsToRemove, onClose, open }) => {
-        const [isRemoving, setIsRemoving] = useState(false);
+        const { isPermorming, execute } = usePromise();
 
         const handleAgree = async () => {
-            setIsRemoving(true);
             try {
-                await folderService.removeItems(itemsToRemove);
-                setTimeout(onItemsRemoved, 500);
+                await execute(async () => {
+                    await folderService.removeItems(itemsToRemove);
+                    await promiseTimeout(500);
+                    onItemsRemoved();
+                });
             }
             finally {
-                setIsRemoving(false);
                 onClose();
             }
         };
@@ -47,7 +50,7 @@ export const RemoveItemDialog: FunctionComponent<RemoveItemDialogProps> = memo(
                         </Button>
                     </DialogActions>
                 </Dialog>
-                <Backdrop open={isRemoving && open} />
+                <CircularBackdrop open={isPermorming && open} />
             </>
         );
     });

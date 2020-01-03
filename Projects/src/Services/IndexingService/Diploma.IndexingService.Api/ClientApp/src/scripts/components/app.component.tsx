@@ -28,7 +28,6 @@ class ErrorBoundary extends React.Component<{}, { error: Error }> {
   public render() {
     if (this.state.error) {
       return (
-        <>
           <Snackbar
             anchorOrigin={{
               vertical: 'bottom',
@@ -37,11 +36,8 @@ class ErrorBoundary extends React.Component<{}, { error: Error }> {
             open={Boolean(this.state.error)}
             autoHideDuration={6000}
             onClose={this.handleClose.bind(this)}
-          >
-            Error: {this.state.error.message}
-          </Snackbar>
-          {this.props.children}
-        </>
+            message={`Error: ${this.state.error.message}`}
+          />
       );
     }
 
