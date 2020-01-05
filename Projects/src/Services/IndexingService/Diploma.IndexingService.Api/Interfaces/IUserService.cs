@@ -15,5 +15,7 @@ namespace Diploma.IndexingService.Api.Interfaces
 		Task<IReadOnlyCollection<Claim>> GetClaims(User user, CancellationToken cancellationToken);
 
 		Task AddUser(User newUser, string password, string role, CancellationToken cancellationToken);
+
+		Task ChangePasswordForCurrentUser(string oldPassword, string newPassword, CancellationToken cancellationToken);
 	}
 }

@@ -9,7 +9,6 @@ import { documentService, UploadingDocument, UploadingState } from "@app/service
 import { format } from "@app/utilities/stringUtils";
 import SettingsIcon from '@material-ui/icons/Settings';
 import { ButtonProps } from "@material-ui/core/Button";
-import { MenuProps } from "@material-ui/core/Menu";
 import { RemoveItemDialog } from "./removeItemDialog.component";
 import { DocumentInfo } from "..";
 

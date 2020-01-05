@@ -24,6 +24,9 @@ export default new Resources({
         "file_name": "File Name: ",
         "found_text": "Text: "
     }),
+    searchSettings: new ResourceSet({
+        "search_folder": "Root search folder:"
+    }),
     uploadDocuments: new ResourceSet({
         "upload_files_info_format": "Uploading {0} files",
         "upload_files_info_with_error_format": "Uploading {0} files, {1} failed"
@@ -49,7 +52,8 @@ export default new Resources({
         "Error": "Error"
     }),
     inProgressDocumentList: new ResourceSet({
-        "no_documents": "List of in-progress documents is empty"
+        "no_documents": "List of in-progress documents is empty",
+        "remove_all": "Remove all"
     }),
     folders: new ResourceSet({
         "add_folder": "Add new folder",
@@ -87,6 +91,10 @@ export default new Resources({
         "password_maxLength": "Password can't be longer than 32 characters",
         "email_required": "Email can't be empty",
         "email_maxLength": "Email can't be longer than 50 characters",
-        "email_pattern": "Email is not valid"
+        "email_pattern": "Email is not valid",
+        "oldPassword": "Old password",
+        "oldPassword_required": "Old password can't be empty",
+        "newPassword": "New password",
+        "change_password": "Change password"
     })
 });

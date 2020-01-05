@@ -1,5 +1,7 @@
-﻿using System.Reflection;
+﻿using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Diploma.Api.Shared.Dto;
 using Diploma.IndexingService.Api.Configuration;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Api.Internal;
@@ -73,12 +75,18 @@ namespace Diploma.IndexingService.Api
 					};
 				});
 
-			services.AddMvc(opt =>
+			services
+				.AddMvc(opt =>
 				{
 					opt.EnableEndpointRouting = false;
 					opt.Filters.Add(new ApiExceptionFilterAttribute());
 				})
-				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
+				.ConfigureApiBehaviorOptions(opt =>
+				{
+					opt.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(
+						ApiResult.ErrorResult(context.ModelState.Where(x => x.Value.Errors.Any()).Select(x => x.Value.Errors.First().ErrorMessage).ToArray()));
+				});
 
 			services.AddHostedService<TempContentBackgroundService>();
 

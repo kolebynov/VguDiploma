@@ -33,6 +33,15 @@ namespace Diploma.IndexingService.Api.Controllers
 			return ApiResult.SuccessResultWithData(currentUser.ToDto());
 		}
 
+		[Authorize]
+		[HttpPost("currentUser/changePassword")]
+		public async Task<ApiResult> ChangePassword(ChangePasswordInput input)
+		{
+			await userService.ChangePasswordForCurrentUser(input.OldPassword, input.NewPassword,
+				CancellationToken.None);
+			return ApiResult.SuccessResult;
+		}
+
 		[HttpPost("login")]
 		public async Task<ApiResult<LoginResponse>> Login([FromBody] LoginInput input)
 		{

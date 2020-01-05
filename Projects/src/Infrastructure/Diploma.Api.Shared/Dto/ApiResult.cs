@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Diploma.Api.Shared.Dto
@@ -17,10 +18,10 @@ namespace Diploma.Api.Shared.Dto
 			Success = true
 		};
 
-		public static ApiResult ErrorResult(string errorMessage) => new ApiResult
+		public static ApiResult ErrorResult(params string[] errorMessages) => new ApiResult
 		{
 			Success = false,
-			Errors = new [] { new ApiError { Message = errorMessage } }
+			Errors = errorMessages.Select(x => new ApiError { Message = x }).ToArray()
 		};
 
 		public static ApiResult<TData> SuccessResultWithData<TData>(TData data) =>

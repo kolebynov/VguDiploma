@@ -57,6 +57,12 @@ class UserService {
     public async register(registerData: RegisterData): Promise<void> {
         await apiRequestExecutor.post("/api/users/register", registerData);
     }
+
+    public async changePassword(oldPassword: string, newPassword: string): Promise<void> {
+        await apiRequestExecutor.post("/api/users/currentUser/changePassword", {
+            oldPassword, newPassword
+        });
+    }
 }
 
 export const userService = new UserService();

@@ -38,7 +38,7 @@ export const InProgressDocumentList: FunctionComponent = memo(() => {
     const renderList = () => (
         <Grid container spacing={3}>
             <Grid item xs={12}>
-                <Button onClick={removeCompletedDocuments}>Remove All</Button>
+                <Button onClick={removeCompletedDocuments}>{resourceSet.getLocalizableValue("remove_all")}</Button>
             </Grid>
             {inProgressDocs.map(doc => (
                 <Grid key={doc.document.id} container item xs={12}>

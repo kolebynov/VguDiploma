@@ -1,13 +1,30 @@
 import React, { FunctionComponent, memo, useState, useEffect } from 'react';
 import { resources } from "@app/utilities/resources";
-import { TextField, Button, Grid } from '@material-ui/core';
+import { TextField, Button, Grid, makeStyles, createStyles, IconButton } from '@material-ui/core';
 import { SearchResultList } from "@app/components";
 import { FoundDocument } from '@app/models';
 import { documentService } from '@app/services';
 import { Loader } from '../loader/loader.component';
 import { Pagination } from '../pagination/pagination.component';
+import SettingsIcon from '@material-ui/icons/Settings';
+import { usePromise } from '@app/utilities/reactUtils';
+import { SearchSettingsDialog } from './searchSettingsDialog.component';
 
 const resourceSet = resources.getResourceSet("search");
+
+const useStyles = makeStyles(theme => createStyles({
+    form: {
+        marginBottom: "5px",
+        display: "flex",
+        alignItems: "flex-end"
+    },
+    actions: {
+        marginLeft: theme.spacing(2)
+    },
+    actionButton: {
+        marginRight: theme.spacing(1)
+    }
+}));
 
 const Search: FunctionComponent = memo(() => {
     const [searchString, setSearchString] = useState("");
@@ -15,25 +32,24 @@ const Search: FunctionComponent = memo(() => {
         documents: new Array<FoundDocument>(),
         totalCount: 0
     });
-    const [isSearching, setSearching] = useState(false);
     const [pagination, setPagination] = useState({
         limit: 10,
         skip: 0
     });
+    const { isPermorming, execute } = usePromise();
+    const [showSettings, setShowSettings] = useState(false);
+    const styles = useStyles({});
 
     const onSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setPagination({ limit: 10, skip: 0 });
         doSearch();
     };
 
     const doSearch = () => {
         if (searchString) {
-            setSearching(true);
-            documentService.search(searchString, pagination.limit, pagination.skip)
-                .then(searchResult => {
-                    setSearchResult(searchResult);
-                    setSearching(false);
-                });
+            execute(() => documentService.search(searchString, pagination.limit, pagination.skip))
+                .then(setSearchResult);
         }
     };
 
@@ -45,18 +61,23 @@ const Search: FunctionComponent = memo(() => {
 
     return (
         <div>
-            <form style={{ marginBottom: "5px" }} noValidate onSubmit={onSubmit}>
+            <form className={styles.form} noValidate onSubmit={onSubmit}>
                 <TextField
                     label={resourceSet.getLocalizableValue("search_title")}
                     value={searchString}
                     onChange={onSearchTextFieldChange}
                 />
-                <Button variant="contained" type="submit">
-                    {resourceSet.getLocalizableValue("search_button_text")}
-                </Button>
+                <div className={styles.actions}>
+                    <Button variant="contained" type="submit" className={styles.actionButton}>
+                        {resourceSet.getLocalizableValue("search_button_text")}
+                    </Button>
+                    <Button variant="contained" onClick={() => setShowSettings(true)}>
+                        <SettingsIcon />
+                    </Button>
+                </div>
             </form>
             <div>
-                {isSearching
+                {isPermorming
                     ? <Loader />
                     : <>
                         <SearchResultList foundDocuments={searchResult.documents} />
@@ -68,6 +89,7 @@ const Search: FunctionComponent = memo(() => {
                         />
                     </>}
             </div>
+            {showSettings ? <SearchSettingsDialog open={true} onClose={() => setShowSettings(false)} /> : null}
         </div>
     );
 });

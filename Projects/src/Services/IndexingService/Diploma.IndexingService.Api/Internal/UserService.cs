@@ -80,6 +80,15 @@ namespace Diploma.IndexingService.Api.Internal
 			await mediator.Publish(new NewUserAdded(newUser), cancellationToken);
 		}
 
+		public async Task ChangePasswordForCurrentUser(string oldPassword, string newPassword, CancellationToken cancellationToken)
+		{
+			var result = await userManager.ChangePasswordAsync(await GetCurrentUser(), oldPassword, newPassword);
+			if (!result.Succeeded)
+			{
+				throw new ApiServiceException(result.Errors.First().Description);
+			}
+		}
+
 		private static string GetFullErrorMessage(IEnumerable<IdentityError> errors) =>
 			string.Join(".", errors.Select(x => x.Description));
 	}

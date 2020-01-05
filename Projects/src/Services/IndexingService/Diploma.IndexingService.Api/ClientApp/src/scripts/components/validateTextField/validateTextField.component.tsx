@@ -8,17 +8,18 @@ export interface ValidateTextFieldProps {
     errors: NestDataObject<Record<string, any>>;
     name: string;
     resourceSet: ResourceSet;
+    labelName?: string;
 }
 
 export const ValidateTextField: FunctionComponent<TextFieldProps & ValidateTextFieldProps> = memo(
-    ({ errors, name, resourceSet, ...other }) => {
+    ({ errors, name, resourceSet, labelName, ...other }) => {
         const errorMessage = getErrorMessage(errors, name, resourceSet);
 
         return (
             <TextField
                 {...other}
                 name={name}
-                label={resourceSet.getLocalizableValue(name)}
+                label={resourceSet.getLocalizableValue(labelName || name)}
                 error={Boolean(errorMessage)}
                 helperText={errorMessage}
             />
