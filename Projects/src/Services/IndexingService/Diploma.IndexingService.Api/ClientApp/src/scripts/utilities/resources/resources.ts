@@ -25,7 +25,8 @@ export default new Resources({
         "found_text": "Text: "
     }),
     searchSettings: new ResourceSet({
-        "search_folder": "Root search folder:"
+        "search_folder": "Root search folder:",
+        "search_in_subFolders": "Search in sub-folders:"
     }),
     uploadDocuments: new ResourceSet({
         "upload_files_info_format": "Uploading {0} files",
@@ -72,7 +73,8 @@ export default new Resources({
         "file": "File",
         "folder": "Folder",
         "actions": "Actions",
-        "remove": "Remove"
+        "remove": "Remove",
+        "rootFolder_name": "root"
     }),
     login: new ResourceSet({
         "userNameOrEmail": "User name or Email",

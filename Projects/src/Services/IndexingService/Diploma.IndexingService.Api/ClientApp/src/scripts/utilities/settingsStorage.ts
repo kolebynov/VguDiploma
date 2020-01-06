@@ -12,6 +12,12 @@ class SettingsStorage {
         return settings[name];
     }
 
+    public save(name: string, value: any) {
+        const settings = this.getSettings();
+        settings[name] = value;
+        this.saveSettings(settings);
+    }
+
     private getSettings() {
         return JSON.parse(localStorage.getItem(this.key) || "{}");
     }

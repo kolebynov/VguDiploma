@@ -33,7 +33,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpGet("{id}/items")]
-		public async Task<PaginationApiResult<IReadOnlyCollection<GetFolderItem>>> GetFolderItems(Guid id, [FromQuery] GetQuery query)
+		public async Task<PaginationApiResult<IReadOnlyCollection<GetFolderItem>>> GetFolderItems(Guid id, [FromQuery] FolderItemsGetQuery query)
 		{
 			var currentUser = await userService.GetCurrentUser();
 
@@ -43,13 +43,19 @@ namespace Diploma.IndexingService.Api.Controllers
 			IReadOnlyCollection<DocumentInfo> documents = new List<DocumentInfo>();
 
 			var foldersCount = await foldersStorage.GetFoldersCount(parentFolderId, CancellationToken.None);
+			var totalCount = foldersCount;
 
-			if (folders.Count < query.Limit)
+			if (!query.OnlyFolders)
 			{
-				var limitForDocuments = query.Limit - folders.Count;
-				var skipForDocuments = Math.Max(query.Skip - foldersCount, 0);
-				documents = await documentStorage.GetDocuments(currentUser, parentFolderId, limitForDocuments,
-					skipForDocuments, CancellationToken.None);
+				if (folders.Count < query.Limit)
+				{
+					var limitForDocuments = query.Limit - folders.Count;
+					var skipForDocuments = Math.Max(query.Skip - foldersCount, 0);
+					documents = await documentStorage.GetDocuments(currentUser, parentFolderId, limitForDocuments,
+						skipForDocuments, CancellationToken.None);
+				}
+
+				totalCount += await documentStorage.GetDocumentsCount(parentFolderId, CancellationToken.None);
 			}
 
 			var result = folders
@@ -73,7 +79,7 @@ namespace Diploma.IndexingService.Api.Controllers
 				(IReadOnlyCollection<GetFolderItem>)result,
 				new PaginationData
 				{
-					TotalCount = foldersCount + await documentStorage.GetDocumentsCount(parentFolderId, CancellationToken.None)
+					TotalCount = totalCount
 				});
 		}
 

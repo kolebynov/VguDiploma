@@ -3,10 +3,10 @@ import { ApiResult, PaginationApiResult } from "@app/models";
 import { apiRequestExecutor } from "./apiRequestExecutor";
 
 class FolderService {
-    public async getItems(folderId: string, limit: number = 10, skip: number = 0)
+    public async getItems(folderId: string, limit = 10, skip = 0, onlyFolders = false)
         : Promise<{items: GetFolderItem[], totalCount: number}> {
         const { data, pagination } = await apiRequestExecutor
-            .get<PaginationApiResult<GetFolderItem[]>>(`/api/folders/${folderId}/items?limit=${limit}&skip=${skip}`);
+            .get<PaginationApiResult<GetFolderItem[]>>(`/api/folders/${folderId}/items?limit=${limit}&skip=${skip}&onlyFolders=${onlyFolders}`);
 
         return {
             items: data,

@@ -68,10 +68,10 @@ const Search: FunctionComponent = memo(() => {
                     onChange={onSearchTextFieldChange}
                 />
                 <div className={styles.actions}>
-                    <Button variant="contained" type="submit" className={styles.actionButton}>
+                    <Button variant="contained" type="submit" className={styles.actionButton} disabled={isPermorming}>
                         {resourceSet.getLocalizableValue("search_button_text")}
                     </Button>
-                    <Button variant="contained" onClick={() => setShowSettings(true)}>
+                    <Button variant="contained" onClick={() => setShowSettings(true)} disabled={isPermorming}>
                         <SettingsIcon />
                     </Button>
                 </div>
