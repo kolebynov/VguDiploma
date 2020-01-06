@@ -30,12 +30,14 @@ export default new Resources({
     }),
     uploadDocuments: new ResourceSet({
         "upload_files_info_format": "Uploading {0} files",
-        "upload_files_info_with_error_format": "Uploading {0} files, {1} failed"
+        "upload_files_info_with_error_format": "Uploading {0} files, {1} failed",
+        "remove_failed": "Remove failed"
     }),
     documentInfo: new ResourceSet({
         "file_name": "File Name",
         "modification_date": "Modification Date",
-        "download_file": "Download"
+        "download_file": "Download",
+        "size": "Size"
     }),
     app: new ResourceSet({
         "my_documents_link": "My documents",
@@ -50,6 +52,11 @@ export default new Resources({
         "InQueue": "In processing queue",
         "Processing": "Processing",
         "Done": "Processing done",
+        "Error": "Error"
+    }),
+    uploadingState: new ResourceSet({
+        "WaitingToUpload": "Waiting to upload",
+        "Uploading": "Uploading",
         "Error": "Error"
     }),
     inProgressDocumentList: new ResourceSet({

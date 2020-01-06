@@ -70,7 +70,8 @@ namespace Diploma.IndexingService.Api.Controllers
 						{
 							Id = d.Id.GetClientId(),
 							FileName = d.FileName,
-							ModificationDate = d.ModificationDate
+							ModificationDate = d.ModificationDate,
+							Size = d.Content.Size
 						}
 					}))
 				.ToArray();

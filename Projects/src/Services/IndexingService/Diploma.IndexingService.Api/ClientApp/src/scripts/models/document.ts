@@ -2,6 +2,7 @@ interface GetDocument {
     id: string;
     fileName: string;
     modificationDate: string;
+    size: number;
 }
 
 interface AddDocument {

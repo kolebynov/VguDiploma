@@ -1,7 +1,7 @@
 import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, InProcessDocumentState, AddDocuments, PaginationApiResult } from "@app/models";
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
 import { GetFolder } from "@app/models/folder";
-import { apiRequestExecutor, ApiRequestError } from "./apiRequestExecutor";
+import { apiRequestExecutor } from "./apiRequestExecutor";
 
 export interface AddDocumentModel {
     document: GetDocument;
@@ -64,6 +64,11 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
             documents: data,
             totalCount: pagination.totalCount
         }
+    }
+
+    public removeFailedUploadings() {
+        this.uploadingDocuments.next(this.uploadingDocuments.value
+            .filter(x => x.state !== UploadingState.Error));
     }
 
     subscribe(observer?: PartialObserver<UploadingDocument[]>): Unsubscribable;

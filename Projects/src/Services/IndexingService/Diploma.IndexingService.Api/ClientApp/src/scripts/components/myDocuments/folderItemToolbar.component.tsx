@@ -1,5 +1,5 @@
 import React, { FunctionComponent, memo, useState, useEffect } from "react";
-import { Paper, Button, makeStyles, Theme, createStyles, Menu, MenuItem, CircularProgress, Typography, Drawer } from "@material-ui/core";
+import { Paper, Button, makeStyles, Theme, createStyles, Menu, MenuItem, CircularProgress, Typography, Drawer, ButtonBase } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { GetFolder, GetFolderItem } from "@app/models/folder";
 import { CreateFolderDialog } from "./createFolderDialog.component";
@@ -11,6 +11,7 @@ import SettingsIcon from '@material-ui/icons/Settings';
 import { ButtonProps } from "@material-ui/core/Button";
 import { RemoveItemDialog } from "./removeItemDialog.component";
 import { DocumentInfo } from "..";
+import { UploadDocumentList } from "../uploadDocumentList/uploadDocumentList.component";
 
 const commonResources = resources.getResourceSet("common");
 const uploadResources = resources.getResourceSet("uploadDocuments");
@@ -22,10 +23,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     },
     uploadInfo: {
         marginLeft: theme.spacing(4),
-        display: "inline-block"
+        textTransform: "none"
     },
     uploadInfoText: {
-        paddingLeft: theme.spacing(1)
+        marginLeft: theme.spacing(1)
     }
 }));
 
@@ -39,23 +40,32 @@ const UploadingItemsInfo: FunctionComponent<UploadingItemsInfoProps> = memo(({ u
         .reduce((counter, d) => d.state !== UploadingState.Error ? counter + 1 : counter, 0);
     const failedCount = uploadingDocuments
         .reduce((counter, d) => d.state === UploadingState.Error ? counter + 1 : counter, 0);
+    const [showUploadList, setShowUploadList] = useState(false);
 
     return (
         <>
-            {count > 0 || failedCount > 0
-                ? <span className={styles.uploadInfo}>
-                    <CircularProgress size={20} />
-                    <Typography
-                        component="span"
-                        variant="body2"
-                        color="textSecondary"
-                        className={styles.uploadInfoText}
-                    >
-                        {failedCount == 0
-                            ? format(uploadResources.getLocalizableValue("upload_files_info_format"), count)
-                            : format(uploadResources.getLocalizableValue("upload_files_info_with_error_format"), count, failedCount)}
-                    </Typography>
-                </span>
+            <Button className={styles.uploadInfo} onClick={() => setShowUploadList(true)}>
+                {count > 0 || failedCount > 0
+                    ? <span>
+                        <CircularProgress size={20} />
+                        <Typography
+                            component="span"
+                            variant="body2"
+                            color="textSecondary"
+                            className={styles.uploadInfoText}
+                        >
+                            {failedCount == 0
+                                ? format(uploadResources.getLocalizableValue("upload_files_info_format"), count)
+                                : format(uploadResources.getLocalizableValue("upload_files_info_with_error_format"), count, failedCount)}
+                        </Typography>
+                    </span>
+                    : null}
+            </Button>
+            {showUploadList
+                ? <Drawer anchor="right"
+                    open={showUploadList}
+                    onClose={() => setShowUploadList(false)}
+                ><UploadDocumentList /></Drawer>
                 : null}
         </>
     );
@@ -144,7 +154,8 @@ export const FolderItemsToolbar: FunctionComponent<FolderItemsToolbarProps> = me
                     document: {
                         id: getIdForDocument(file, currentFolder),
                         fileName: file.name,
-                        modificationDate: getModificationDateForDocument(file)
+                        modificationDate: getModificationDateForDocument(file),
+                        size: file.size
                     },
                     file
                 }));
