@@ -47,7 +47,9 @@ const DocumentInfo: FunctionComponent<DocumentInfoProps> = memo(({ document }) =
                 <InfoRow labelResourceName="size" value={`${(document.size / 1024).toFixed(2)} KB`} />
             </CardContent>
             <CardActions>
-                <Button href={documentService.getContentUri(document.id)}>{resourceSet.getLocalizableValue("download_file")}</Button>
+                <Button onClick={() => documentService.downloadDocument(document.id)}>
+                    {resourceSet.getLocalizableValue("download_file")}
+                </Button>
             </CardActions>
         </Card>
     );

@@ -51,8 +51,12 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
         return results;
     }
 
-    public getContentUri(docId: string) {
-        return `/api/documents/${docId}/content`;
+    public async downloadDocument(docId: string) {
+        const { data } = await apiRequestExecutor.get<ApiResult<string>>(`/api/documents/${docId}/downloadLink`);
+        const link = document.createElement("a");
+        link.setAttribute("href", data);
+        link.click();
+        link.remove();
     }
 
     public async search(searchString: string, limit = 10, skip = 0)

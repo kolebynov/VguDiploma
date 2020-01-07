@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Diploma.Api.Shared.Dto;
 using Diploma.IndexingService.Api.Dto;
+using Diploma.IndexingService.Api.Exceptions;
 using Diploma.IndexingService.Api.Extensions;
 using Diploma.IndexingService.Api.Interfaces;
 using Diploma.IndexingService.Api.Internal;
@@ -13,6 +15,7 @@ using Diploma.IndexingService.Core.Interfaces;
 using Diploma.IndexingService.Core.Objects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -21,7 +24,6 @@ namespace Diploma.IndexingService.Api.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	[Authorize]
 	public class DocumentsController : ControllerBase
 	{
 		private readonly IMediator mediator;
@@ -30,6 +32,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		private readonly IDocumentStorage documentStorage;
 		private readonly IContentTypeProvider contentTypeProvider;
 		private readonly IFoldersStorage foldersStorage;
+		private readonly ITimeLimitedDataProtector dataProtector;
 
 		public DocumentsController(
 			IMediator mediator,
@@ -37,22 +40,54 @@ namespace Diploma.IndexingService.Api.Controllers
 			IUserService userService,
 			IDocumentStorage documentStorage,
 			IContentTypeProvider contentTypeProvider,
-			IFoldersStorage foldersStorage)
+			IFoldersStorage foldersStorage,
+			IDataProtectionProvider dataProtectionProvider)
 		{
+			if (dataProtectionProvider == null)
+			{
+				throw new ArgumentNullException(nameof(dataProtectionProvider));
+			}
+
 			this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 			this.tempContentStorage = tempContentStorage ?? throw new ArgumentNullException(nameof(tempContentStorage));
 			this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
 			this.documentStorage = documentStorage ?? throw new ArgumentNullException(nameof(documentStorage));
 			this.contentTypeProvider = contentTypeProvider ?? throw new ArgumentNullException(nameof(contentTypeProvider));
 			this.foldersStorage = foldersStorage ?? throw new ArgumentNullException(nameof(foldersStorage));
+
+			dataProtector = dataProtectionProvider
+				.CreateProtector(nameof(DocumentsController))
+				.ToTimeLimitedDataProtector();
 		}
 
-		[HttpGet("{documentId}/content")]
-		public async Task<FileStreamResult> GetDocumentContent(string documentId)
+		[HttpGet("{documentId}/downloadLink")]
+		[Authorize]
+		public async Task<ApiResult<string>> RedirectToDownloadDocument(string documentId)
 		{
 			var currentUser = await userService.GetCurrentUser();
+			var encryptedData = dataProtector.Protect($"{documentId}_{currentUser.Id}", DateTimeOffset.UtcNow.AddMinutes(10));
+			return ApiResult.SuccessResultWithData(Url.Action("GetDocumentContent", new { encryptedData }));
+		}
+
+		[HttpGet("download/{encryptedData}")]
+		public async Task<FileStreamResult> GetDocumentContent(string encryptedData)
+		{
+			string decryptedData;
+
+			try
+			{
+				decryptedData = dataProtector.Unprotect(encryptedData);
+			}
+			catch (CryptographicException)
+			{
+				throw new ApiServiceException("Download data is not valid");
+			}
+
+			var index = decryptedData.LastIndexOf('_');
+			var documentId = decryptedData.Substring(0, index);
+			var userId = new Guid(decryptedData.Substring(index + 1));
 			var document = await documentStorage.GetDocument(
-				new DocumentIdentity(documentId, currentUser.Id),
+				new DocumentIdentity(documentId, userId),
 				CancellationToken.None);
 			contentTypeProvider.TryGetContentType(document.FileName, out var contentType);
 
@@ -66,6 +101,7 @@ namespace Diploma.IndexingService.Api.Controllers
 		}
 
 		[HttpPost]
+		[Authorize]
 		public async Task<ApiResult<IReadOnlyCollection<AddDocumentResultDto>>> AddDocuments(
 			[FromBody]AddDocumentsInput input)
 		{
