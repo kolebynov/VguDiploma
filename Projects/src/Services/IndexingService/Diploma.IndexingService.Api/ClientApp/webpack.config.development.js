@@ -58,7 +58,7 @@ module.exports = function (env, props) {
 
 			proxy: {
 				'/api/*': {
-					target: 'http://azure-ubuntu.westeurope.cloudapp.azure.com'
+					target: 'http://127.0.0.1:5000'
 				}
 			}
 		},

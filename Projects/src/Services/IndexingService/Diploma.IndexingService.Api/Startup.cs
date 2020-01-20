@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -80,6 +81,7 @@ namespace Diploma.IndexingService.Api
 				{
 					opt.EnableEndpointRouting = false;
 					opt.Filters.Add(new ApiExceptionFilterAttribute());
+					opt.ModelBinderProviders.Insert(0, new ObjectsModelBinderProvider());
 				})
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0)
 				.ConfigureApiBehaviorOptions(opt =>
@@ -93,6 +95,8 @@ namespace Diploma.IndexingService.Api
 			services.AddScoped<ITempContentStorage, TempContentStorage>();
 			services.AddScoped<IUserService, UserService>();
 
+			services.AddSingleton<DocumentIdentityModelBinder>();
+			services.AddSingleton<FolderIdentityModelBinder>();
 			services.AddSingleton<IContentTypeProvider, FileExtensionContentTypeProvider>();
 
 			services.Configure<CoreOptions>(Configuration);

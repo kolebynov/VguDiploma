@@ -26,7 +26,8 @@ export default new Resources({
     }),
     searchSettings: new ResourceSet({
         "search_folder": "Root search folder:",
-        "search_in_subFolders": "Search in sub-folders:"
+        "search_in_subFolders": "Search in sub-folders:",
+        "search_type": "Search type"
     }),
     uploadDocuments: new ResourceSet({
         "upload_files_info_format": "Uploading {0} files",
@@ -58,6 +59,11 @@ export default new Resources({
         "WaitingToUpload": "Waiting to upload",
         "Uploading": "Uploading",
         "Error": "Error"
+    }),
+    searchType: new ResourceSet({
+        "Default": "Default",
+        "Wildcard": "Wildcard",
+        "Regexp": "Regexp"
     }),
     inProgressDocumentList: new ResourceSet({
         "no_documents": "List of in-progress documents is empty",

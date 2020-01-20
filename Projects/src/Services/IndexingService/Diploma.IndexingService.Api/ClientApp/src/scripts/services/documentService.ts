@@ -2,6 +2,9 @@ import { AddDocumentResult, ApiResult, AddDocument, GetDocument, FoundDocument, 
 import { BehaviorSubject, Subscribable, PartialObserver, Unsubscribable } from "rxjs";
 import { GetFolder } from "@app/models/folder";
 import { apiRequestExecutor } from "./apiRequestExecutor";
+import { SearchType } from "@app/models/searchSettings";
+import { settingsStorage } from "@app/utilities/settingsStorage";
+import { stringify } from "querystring";
 
 export interface AddDocumentModel {
     document: GetDocument;
@@ -38,10 +41,10 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
             this.updateState(document.document.id, folder.id, UploadingState.Uploading);
 
             try {
-            const result = await this.addDocument(document, folder.id);
-            results.push(result);
-            this.uploadingDocuments.next(this.uploadingDocuments.value
-                .filter(x => !(x.document.id === document.document.id && x.folder.id === folder.id)));
+                const result = await this.addDocument(document, folder.id);
+                results.push(result);
+                this.uploadingDocuments.next(this.uploadingDocuments.value
+                    .filter(x => !(x.document.id === document.document.id && x.folder.id === folder.id)));
             }
             catch (e) {
                 this.updateState(document.document.id, folder.id, UploadingState.Error, e.message);
@@ -61,8 +64,17 @@ class DocumentService implements Subscribable<UploadingDocument[]> {
 
     public async search(searchString: string, limit = 10, skip = 0)
         : Promise<{ documents: FoundDocument[], totalCount: number }> {
+        const settings = settingsStorage.getSearchSettings();
+        const searchParams = {
+            folderId: settings.searchFolder.id,
+            searchInSubFolders: settings.searchInSubFolders,
+            searchString: searchString,
+            searchType: settings.searchType,
+            limit: limit,
+            skip: skip
+        }
         const { data, pagination } = await apiRequestExecutor
-            .get<PaginationApiResult<FoundDocument[]>>(`/api/search?searchString=${searchString}&limit=${limit}&skip=${skip}`);
+            .get<PaginationApiResult<FoundDocument[]>>(`/api/search?${stringify(searchParams)}`);
 
         return {
             documents: data,

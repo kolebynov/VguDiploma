@@ -11,5 +11,7 @@
 		public FolderIdentity FolderId { get; set; }
 
 		public bool SearchInSubFolders { get; set; } = true;
+
+		public SearchType SearchType { get; set; } = SearchType.Default;
 	}
 }

@@ -1,14 +1,15 @@
 import React, { FunctionComponent, memo, useState } from "react";
-import { Dialog, DialogActions, Button, DialogContent, Link, Typography, createStyles, makeStyles, Checkbox } from "@material-ui/core";
+import { Dialog, DialogActions, Button, DialogContent, Link, Typography, createStyles, makeStyles, Checkbox, FormControl, RadioGroup, FormLabel, FormControlLabel, Radio } from "@material-ui/core";
 import { resources } from "@app/utilities/resources";
 import { settingsStorage } from "@app/utilities/settingsStorage";
 import { GetFolder } from "@app/models/folder";
 import { constants } from "@app/utilities";
-import { SearchSettings } from "@app/models/searchSettings";
+import { SearchSettings, SearchType } from "@app/models/searchSettings";
 import { SearchFolderDialog } from "./searchFolderDialog.component";
 
 const commonResources = resources.getResourceSet("common");
 const settingsResources = resources.getResourceSet("searchSettings");
+const searchTypeResource = resources.getResourceSet("searchType");
 
 const useStyles = makeStyles(theme => createStyles({
     settingRow: {
@@ -20,7 +21,8 @@ const useStyles = makeStyles(theme => createStyles({
     settingLabel: {
         marginRight: theme.spacing(2)
     },
-    settingValue: {
+    searchType: {
+        marginTop: theme.spacing(2)
     }
 }));
 
@@ -40,20 +42,13 @@ const SettingRow: FunctionComponent<SettingRowProps> = memo(({ label, value }) =
     return (
         <div className={styles.settingRow}>
             <Typography className={styles.settingLabel}>{label}</Typography>
-            <Typography className={styles.settingValue}>{value}</Typography>
+            <Typography>{value}</Typography>
         </div>
     );
 });
 
 export const SearchSettingsDialog: FunctionComponent<SearchSettingsDialogProps> = memo(({ open, onClose }) => {
-    const [searchSettings, setSearchSettings] = useState<SearchSettings>(
-        settingsStorage.getOrAdd("search_settings", () => ({
-            searchFolder: {
-                id: constants.RootFolderId,
-                name: commonResources.getLocalizableValue("rootFolder_name")
-            },
-            searchInSubFolders: true
-        })));
+    const [searchSettings, setSearchSettings] = useState(settingsStorage.getSearchSettings());
     const [showSearchFolderDialog, setShowSearchFolderDialog] = useState(false);
 
     const setSearchFolder = (folder: GetFolder) =>
@@ -67,10 +62,17 @@ export const SearchSettingsDialog: FunctionComponent<SearchSettingsDialogProps> 
         searchInSubFolders: value
     });
 
+    const setSearchType = (value: SearchType) => setSearchSettings({
+        ...searchSettings,
+        searchType: value
+    });
+
     const handleSave = () => {
         settingsStorage.save("search_settings", searchSettings);
         onClose();
     }
+
+    const styles = useStyles({});
 
     return (
         <>
@@ -91,6 +93,33 @@ export const SearchSettingsDialog: FunctionComponent<SearchSettingsDialogProps> 
                             onChange={(_, checked) => setSearchInSubFolders(checked)}
                         />}
                     />
+                    <FormControl component="fieldset" className={styles.searchType}>
+                        <FormLabel component="legend">
+                            {settingsResources.getLocalizableValue("search_type")}
+                        </FormLabel>
+                        <RadioGroup
+                            aria-label="gender"
+                            name="gender1"
+                            value={searchSettings.searchType}
+                            onChange={e => setSearchType(parseInt(e.target.value))}
+                        >
+                            <FormControlLabel
+                                value={SearchType.Default}
+                                control={<Radio color="primary" />}
+                                label={searchTypeResource.getLocalizableValue(SearchType[SearchType.Default])}
+                            />
+                            <FormControlLabel
+                                value={SearchType.Wildcard}
+                                control={<Radio color="primary" />}
+                                label={searchTypeResource.getLocalizableValue(SearchType[SearchType.Wildcard])}
+                            />
+                            <FormControlLabel
+                                value={SearchType.Regexp}
+                                control={<Radio color="primary" />}
+                                label={searchTypeResource.getLocalizableValue(SearchType[SearchType.Regexp])}
+                            />
+                        </RadioGroup>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button type="submit" color="primary" onClick={handleSave}>
