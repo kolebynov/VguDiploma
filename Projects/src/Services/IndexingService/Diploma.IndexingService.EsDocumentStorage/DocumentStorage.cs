@@ -68,14 +68,7 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			var response = await elasticClient.SearchAsync<DocumentInfoModel>(
 				sd => sd
 					.Index(options.IndexName)
-					.Query(qd => qd
-						.Bool(bqd => bqd
-							.Must(
-								qcd => qcd.MultiMatch(mmqd => mmqd
-									.Fields(new[] { "text", "fileName" })
-									.Query(searchQuery.SearchString)),
-								qcd => qcd
-									.Term("id.userIdentity.keyword", user.Id))))
+					.Query(qd => BuildSearchQuery(qd, searchQuery, user))
 					.Highlight(hs => hs
 						.Fields(hfd => hfd.Field("text"), hfd => hfd.Field("fileName")))
 					.Source(sfd => sfd.Includes(fd => fd.Field("fileName")))
@@ -182,6 +175,35 @@ namespace Diploma.IndexingService.EsDocumentStorage
 			CheckResponse(response, "Error during getting count documents in folder");
 
 			return (int)response.Count;
+		}
+
+		private QueryContainer BuildSearchQuery(QueryContainerDescriptor<DocumentInfoModel> qd, SearchQuery searchQuery, User user) =>
+			qd
+				.Bool(bqd => bqd
+					.Must(
+						qcd => BuildInnerSearchQuery(qcd, searchQuery),
+						qcd => BuildFolderQuery(qcd, searchQuery),
+						qcd => qcd
+							.Term("id.userIdentity.keyword", user.Id)));
+
+		private QueryContainer BuildInnerSearchQuery(QueryContainerDescriptor<DocumentInfoModel> qd, SearchQuery searchQuery) =>
+			searchQuery.SearchType switch
+			{
+				SearchType.Default => qd.MultiMatch(mmqd => mmqd
+					.Fields(new[] { "text", "fileName" })
+					.Query(searchQuery.SearchString)),
+				SearchType.Wildcard => qd.Bool(bd => bd.Should(
+					qcd => qcd.Wildcard("text", searchQuery.SearchString),
+					qcd => qcd.Wildcard("fileName", searchQuery.SearchString))),
+				SearchType.Regexp => qd.Bool(bd => bd.Should(
+					qcd => qcd.Regexp(rd => rd.Field("text").Value(searchQuery.SearchString)),
+					qcd => qcd.Regexp(rd => rd.Field("fileName").Value(searchQuery.SearchString))))
+			};
+
+		private QueryContainer BuildFolderQuery(QueryContainerDescriptor<DocumentInfoModel> qd, SearchQuery searchQuery)
+		{
+			var folderFieldName = searchQuery.SearchInSubFolders ? "parentFoldersPath" : "folderId";
+			return qd.Term(folderFieldName, searchQuery.FolderId.ToString());
 		}
 
 		private DocumentInfo ToDocumentInfo(DocumentInfoModel source, CancellationToken cancellationToken) =>
